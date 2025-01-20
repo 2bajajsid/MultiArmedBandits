@@ -34,21 +34,21 @@ def get_expected_regret_upper_bound(time_horizon, a, k, means):
 # where 'A' negative and positive 
 # pseudo rewards are added at each 
 # step over T rounds
-def conduct_giro_simulation(K, A, T, M=100):
+def simulate_giro(K, A, T, M=100):
 
     # data_structure to keep track of the
     # accumulated regret up to the current round
     # for M different runs
     accumulated_regret = np.zeros(shape=(M, T))
 
-    for m in range(0, M):
-        # Generate the means of the arms 
-        # using a Uniform distribution
-        arms_mean_lower_range = 0.25
-        arms_mean_upper_range = 0.75
-        arms_mean = np.flip(np.sort(random.uniform(arms_mean_lower_range, arms_mean_upper_range, size = K)))
-        optimal_arm_mean = arms_mean[0]
+    # Generate the means of the arms 
+    # using a Uniform distribution
+    arms_mean_lower_range = 0.25
+    arms_mean_upper_range = 0.75
+    arms_mean = np.flip(np.sort(random.uniform(arms_mean_lower_range, arms_mean_upper_range, size = K)))
+    optimal_arm_mean = arms_mean[0]
 
+    for m in range(0, M):
         # initialize the data_structures
         # to hold the history of each arm
         history = []
@@ -110,17 +110,86 @@ def conduct_giro_simulation(K, A, T, M=100):
 
     return np.mean(accumulated_regret, axis=0)
 
+# K-armed Bernoulli Bandit 
+# problem tackled using UCB 
+# over T rounds
+# This is not an any-time algorithm!
+def simulate_ucb(K, T, delta, M=100):
+
+    # data_structure to keep track of the
+    # accumulated regret up to the current round
+    # for M different runs
+    accumulated_regret = np.zeros(shape=(M, T))
+
+    # Generate the means of the arms 
+    # using a Uniform distribution
+    arms_mean_lower_range = 0.25
+    arms_mean_upper_range = 0.75
+    arms_mean = np.flip(np.sort(random.uniform(arms_mean_lower_range, arms_mean_upper_range, size = K)))
+    optimal_arm_mean = arms_mean[0]
+
+    for m in range(0, M):
+
+        # initialize the data structures
+        # to hold the history of each arm
+        history = []
+        for i in range(K):
+            history.append([])
+
+        for i in range(T):
+            # estimate arm values 
+            arm_estimates_current_round = np.zeros(shape = K)
+
+            for j in range(K):
+                s = len(history[j])
+
+                if (s > 0):
+                    f_hat_pi = np.mean(history[j])
+                    half_confidence_interval_width = math.sqrt(2 * math.log(1/delta) / s)
+                    arm_estimates_current_round[j] = f_hat_pi + half_confidence_interval_width
+                else:
+                    arm_estimates_current_round[j] = np.inf
+
+            # get maximum estimate 
+            # of the pulled arm
+            I_t = np.argmax(arm_estimates_current_round)
+    
+            # reward is generated 
+            # by nature
+            r_t = random.binomial(1, arms_mean[I_t])
+
+            # Update the statistics 
+            history[I_t].append(r_t)
+
+            # add to accumulated regret only if 
+            # optimal arm was not chosen this round 
+            if (I_t != 0):
+                sub_optimality_gap = (optimal_arm_mean - arms_mean[I_t]) 
+                if (i == 0):
+                    accumulated_regret[m][i] = sub_optimality_gap
+                else: 
+                    accumulated_regret[m][i] = accumulated_regret[m][i-1] + (sub_optimality_gap)
+            else:
+                if (i != 1):
+                    accumulated_regret[m][i] = accumulated_regret[m][i-1]
+
+        print('delta={:f}, m={:d}'.format(delta, m))
+    return np.mean(accumulated_regret, axis=0)
+
 T = 5000
-plt.plot(range(T), conduct_giro_simulation(K = 10, A = 0.5, T = T), label="Observed Regret with A = 0.5")
-plt.plot(range(T), conduct_giro_simulation(K = 10, A = 1, T = T), label="Observed Regret with A = 1")
-plt.plot(range(T), conduct_giro_simulation(K = 10, A = 2, T = T), label="Observed Regret with A = 2")
-plt.plot(range(T), conduct_giro_simulation(K = 10, A = 5, T = T), label="Observed Regret with A = 5")
-plt.plot(range(T), conduct_giro_simulation(K = 10, A = 10, T = T), label="Observed Regret with A = 10")
-plt.plot(range(T), conduct_giro_simulation(K = 10, A = 10, T = T), label="Observed Regret with A = 50")
+K = 10
+plt.plot(range(T), simulate_giro(K = K, A = 0.5, T = T), label="Average Regret (GIRO; A = 0.5)")
+#plt.plot(range(T), simulate_giro(K = K, A = 1, T = T), label="Average Regret (GIRO; A = 1)")
+plt.plot(range(T), simulate_giro(K = K, A = 2, T = T), label="Average Regret (GIRO; A = 2)")
+#plt.plot(range(T), simulate_giro(K = K, A = 5, T = T), label="Average Regret (GIRO; A = 5)")
+#plt.plot(range(T), simulate_giro(K = K, A = 10, T = T), label="Average Regret (GIRO; A = 10)")
+plt.plot(range(T), simulate_giro(K = K, A = 50, T = T), label="Average Regret (GIRO; A = 50)")
+plt.plot(range(T), simulate_ucb(K= K, T = T, delta = (1 / K**2)), label="Average Regret (UCB) with delta = (1 / K^2)")
+plt.plot(range(T), simulate_ucb(K= K, T = T, delta = (1 / K)), label="Average Regret (UCB) with delta = (1 / K)")
 #plt.plot(range(T), get_expected_regret_upper_bound(T, A, K, arms_mean), label="Regret Upper Bound")
 plt.legend()
 plt.ylabel('Regret')
 plt.xlabel('Round n')
-plt.title("Observed Regret of non-contextual GIRO on 10-armed Bernoulli Bandit problem with varying A")
+plt.title("Observed Regret of non-contextual GIRO vs. UCB on 10-armed Bernoulli Bandit problem with varying A")
 plt.show()
         
