@@ -3,38 +3,91 @@ import matplotlib.pyplot as plt
 from numpy import random
 import math
 
-# expected regret upper bound of GIRO
-# for Bernoulli Bandits
-def get_expected_regret_upper_bound(time_horizon, a, k, means):
-    b = (2*a + 1) / (a * (a + 1))
-    c = ((2 * math.exp(2) * math.sqrt((2 * a) + 1)) / math.sqrt(2 * math.pi)) * math.exp((8 * b) / (2 - b)) * (1 + math.sqrt((2 * math.pi) / (4 - (2 * b)))) 
 
-    # R(n) <= x + (ln(n) * y) for a > 0.707
-    x = 0
-    y = 0
-    optimality_gaps = np.zeros(shape = k - 1)
+def GIRO_arm_estimates_factory_function(A):
 
-    # Let's compute x and y
-    for i in range(k-1):
-        optimality_gaps[i] = means[0] - means[i+1]
-        x += (4 * optimality_gaps[i])
-        y += ((48 * a) + 8 + (16 * c)) / optimality_gaps[i]
+    def GIRO_arm_estimates_function(history, t):
+        num_arms = len(history)
+        arm_estimates_current_round = np.zeros(shape=K)
+        for j in range(num_arms):
 
-    expected_regret_upper_bound = np.zeros(shape = time_horizon)
-    for i in range(time_horizon):
-        if (i == 0):
-            expected_regret_upper_bound[i] = x
+            s = len(history[j])
+            if (s > 0): 
+                # V_is stores the number 
+                # of observed-rewards 
+                # and pseudo-rewards
+                V_is = np.count_nonzero(history[j])
+                if int(A) == A:        
+                    V_is += (A * s)
+                    alpha = (2*A + 1)
+                else:
+                    z = random.binomial(1, math.ceil(A*s) - (A*s))
+                    if (z == 1):
+                        V_is += (math.floor(A*s))
+                        alpha = (2 * (math.floor(A*s)) + 1)
+                    else:
+                        V_is += (math.ceil(A*s))
+                        alpha = (2 * (math.ceil(A*s)) + 1)
+                # U_is is the bootstrap sample
+                U_is = random.binomial(alpha * s, V_is / (alpha * s))
+                arm_estimates_current_round[j] = (U_is / (alpha * s))
+            else:
+                arm_estimates_current_round[j] = np.inf
+
+        return arm_estimates_current_round
+
+    return GIRO_arm_estimates_function
+
+
+def UCB_arm_estimates_function(history, t):
+
+    num_arms = len(history)
+    arm_estimates_current_round = np.zeros(shape=K)
+    for j in range(num_arms):
+
+        s = len(history[j])
+
+        if (s > 0):
+            f_hat_pi = np.mean(history[j])
+            f_t = 1 + (t * (math.log(t)**2))
+            half_confidence_interval_width = math.sqrt((2 * math.log(f_t)) / (s))
+            arm_estimates_current_round[j] = f_hat_pi + half_confidence_interval_width
         else:
-            expected_regret_upper_bound[i] = expected_regret_upper_bound[i-1] + (math.log(i+1) - math.log(i)) * (y)
+            arm_estimates_current_round[j] = np.inf
 
-    return expected_regret_upper_bound
+    return arm_estimates_current_round
+
+
+def TS_arm_estimates_function(history, t):
+    num_arms = len(history)
+    arm_estimates_current_round = np.zeros(shape=K)
+
+    for j in range(num_arms):
+        s = len(history[j])
+        alpha_j = np.count_nonzero(history[j])
+        beta_j = s - alpha_j
+        arm_estimates_current_round[j] = random.beta(alpha_j + 1, beta_j + 1, size=1)
+
+    return arm_estimates_current_round
+
+def bernoulli_bandit(mu_i):
+    return random.binomial(n=1, p = mu_i)
+
+def beta_bandit_factory(nu, ts=False):
+    
+    def beta_bandit(mu_i):
+        r_t = random.beta(nu * mu_i, nu * (1 - mu_i))
+        if (ts == True):
+            return random.binomial(n=1, p = r_t)
+        else:
+            return r_t
+    
+    return beta_bandit
 
 # K-armed Bernoulli Bandit 
-# problem tackled using GIRO 
-# where 'A' negative and positive 
-# pseudo rewards are added at each 
-# step over T rounds
-def simulate_giro(K, A, T, M=100):
+# problem tackled using 
+# various algorithms
+def simulate_stochastic_bandit_problem(K, T, generate_reward, compute_arm_estimates, M=1000):
 
     # data_structure to keep track of the
     # accumulated regret up to the current round
@@ -57,31 +110,7 @@ def simulate_giro(K, A, T, M=100):
 
         for i in range(T):
             # estimate arm values 
-            arm_estimates_current_round = np.zeros(shape = K)
-
-            for j in range(K):
-                s = len(history[j])
-                if (s > 0): 
-                    # V_is stores the number 
-                    # of observed rewards 
-                    # and pseudo rewards
-                    V_is = np.count_nonzero(history[j] == 1)
-                    if int(A) == A:        
-                        V_is += (A * s)
-                        alpha = (2*A + 1)
-                    else:
-                        z = random.binomial(1, math.ceil(A*s) - (A*s))
-                        if (z == 1):
-                            V_is += (math.floor(A*s))
-                            alpha = (2 * (math.floor(A*s)) + 1)
-                        else:
-                            V_is += (math.ceil(A*s))
-                            alpha = (2 * (math.ceil(A*s)) + 1)
-                    # U_is is the bootstrap sample
-                    U_is = random.binomial(alpha * s, V_is / (alpha * s))
-                    arm_estimates_current_round[j] = (U_is / (alpha * s))
-                else:
-                    arm_estimates_current_round[j] = np.inf
+            arm_estimates_current_round = compute_arm_estimates(history, i)
 
             # get maximum estimate 
             # of the pulled arm
@@ -89,7 +118,7 @@ def simulate_giro(K, A, T, M=100):
     
             # reward is generated 
             # by nature
-            r_t = random.binomial(1, arms_mean[I_t])
+            r_t = generate_reward(arms_mean[I_t])
 
             # Update the statistics 
             history[I_t].append(r_t)
@@ -106,90 +135,47 @@ def simulate_giro(K, A, T, M=100):
                 if (i != 1):
                     accumulated_regret[m][i] = accumulated_regret[m][i-1]
 
-        print('A={:f}, m = {:d}'.format(A, m))
+        print('m = {:d}'.format(m))
 
     return np.mean(accumulated_regret, axis=0)
 
-# K-armed Bernoulli Bandit 
-# problem tackled using UCB 
-# over T rounds
-# This is not an any-time algorithm!
-def simulate_ucb(K, T, delta, M=100):
 
-    # data_structure to keep track of the
-    # accumulated regret up to the current round
-    # for M different runs
-    accumulated_regret = np.zeros(shape=(M, T))
-
-    # Generate the means of the arms 
-    # using a Uniform distribution
-    arms_mean_lower_range = 0.25
-    arms_mean_upper_range = 0.75
-    arms_mean = np.flip(np.sort(random.uniform(arms_mean_lower_range, arms_mean_upper_range, size = K)))
-    optimal_arm_mean = arms_mean[0]
-
-    for m in range(0, M):
-
-        # initialize the data structures
-        # to hold the history of each arm
-        history = []
-        for i in range(K):
-            history.append([])
-
-        for i in range(T):
-            # estimate arm values 
-            arm_estimates_current_round = np.zeros(shape = K)
-
-            for j in range(K):
-                s = len(history[j])
-
-                if (s > 0):
-                    f_hat_pi = np.mean(history[j])
-                    half_confidence_interval_width = math.sqrt(2 * math.log(1/delta) / s)
-                    arm_estimates_current_round[j] = f_hat_pi + half_confidence_interval_width
-                else:
-                    arm_estimates_current_round[j] = np.inf
-
-            # get maximum estimate 
-            # of the pulled arm
-            I_t = np.argmax(arm_estimates_current_round)
-    
-            # reward is generated 
-            # by nature
-            r_t = random.binomial(1, arms_mean[I_t])
-
-            # Update the statistics 
-            history[I_t].append(r_t)
-
-            # add to accumulated regret only if 
-            # optimal arm was not chosen this round 
-            if (I_t != 0):
-                sub_optimality_gap = (optimal_arm_mean - arms_mean[I_t]) 
-                if (i == 0):
-                    accumulated_regret[m][i] = sub_optimality_gap
-                else: 
-                    accumulated_regret[m][i] = accumulated_regret[m][i-1] + (sub_optimality_gap)
-            else:
-                if (i != 1):
-                    accumulated_regret[m][i] = accumulated_regret[m][i-1]
-
-        print('delta={:f}, m={:d}'.format(delta, m))
-    return np.mean(accumulated_regret, axis=0)
-
-T = 5000
+T = 500
 K = 10
-plt.plot(range(T), simulate_giro(K = K, A = 0.5, T = T), label="Average Regret (GIRO; A = 0.5)")
-#plt.plot(range(T), simulate_giro(K = K, A = 1, T = T), label="Average Regret (GIRO; A = 1)")
-plt.plot(range(T), simulate_giro(K = K, A = 2, T = T), label="Average Regret (GIRO; A = 2)")
-#plt.plot(range(T), simulate_giro(K = K, A = 5, T = T), label="Average Regret (GIRO; A = 5)")
-#plt.plot(range(T), simulate_giro(K = K, A = 10, T = T), label="Average Regret (GIRO; A = 10)")
-plt.plot(range(T), simulate_giro(K = K, A = 50, T = T), label="Average Regret (GIRO; A = 50)")
-plt.plot(range(T), simulate_ucb(K= K, T = T, delta = (1 / K**2)), label="Average Regret (UCB) with delta = (1 / K^2)")
-plt.plot(range(T), simulate_ucb(K= K, T = T, delta = (1 / K)), label="Average Regret (UCB) with delta = (1 / K)")
-#plt.plot(range(T), get_expected_regret_upper_bound(T, A, K, arms_mean), label="Regret Upper Bound")
+
+plt.plot(range(T), simulate_stochastic_bandit_problem(K= K, T = T, generate_reward = bernoulli_bandit, compute_arm_estimates = UCB_arm_estimates_function), label="Average Regret (UCB)")
+plt.plot(range(T), simulate_stochastic_bandit_problem(K= K, T = T, generate_reward = bernoulli_bandit, compute_arm_estimates = TS_arm_estimates_function), label="Average Regret (Thompson Sampling)")
+plt.plot(range(T), simulate_stochastic_bandit_problem(K = K, T = T, generate_reward = bernoulli_bandit, compute_arm_estimates = GIRO_arm_estimates_factory_function(0.5)), label="Average Regret (GIRO; A = 0.5)")
+plt.plot(range(T), simulate_stochastic_bandit_problem(K = K, T = T, generate_reward = bernoulli_bandit, compute_arm_estimates = GIRO_arm_estimates_factory_function(0.1)), label="Average Regret (GIRO; A = 0.1)")
+plt.plot(range(T), simulate_stochastic_bandit_problem(K = K, T = T, generate_reward = bernoulli_bandit, compute_arm_estimates = GIRO_arm_estimates_factory_function(1)), label="Average Regret (GIRO; A = 1)")
+plt.title("Observed Regret of GIRO (with varying A) vs. UCB vs. Thompson Sampling on 10-armed Bernoulli Bandit problem")
+
 plt.legend()
 plt.ylabel('Regret')
 plt.xlabel('Round n')
-plt.title("Observed Regret of non-contextual GIRO vs. UCB on 10-armed Bernoulli Bandit problem with varying A")
+plt.show()
+
+plt.plot(range(T), simulate_stochastic_bandit_problem(K= K, T = T, generate_reward = beta_bandit_factory(nu=4), compute_arm_estimates = UCB_arm_estimates_function), label="Average Regret (UCB)")
+plt.plot(range(T), simulate_stochastic_bandit_problem(K= K, T = T, generate_reward = beta_bandit_factory(nu=4, ts=True), compute_arm_estimates = TS_arm_estimates_function), label="Average Regret (Thompson Sampling)")
+plt.plot(range(T), simulate_stochastic_bandit_problem(K = K, T = T, generate_reward = beta_bandit_factory(nu=4), compute_arm_estimates = GIRO_arm_estimates_factory_function(0.5)), label="Average Regret (GIRO; A = 0.5)")
+plt.plot(range(T), simulate_stochastic_bandit_problem(K = K, T = T, generate_reward = beta_bandit_factory(nu=4), compute_arm_estimates = GIRO_arm_estimates_factory_function(0.1)), label="Average Regret (GIRO; A = 0.1)")
+plt.plot(range(T), simulate_stochastic_bandit_problem(K = K, T = T, generate_reward = beta_bandit_factory(nu=4), compute_arm_estimates = GIRO_arm_estimates_factory_function(1)), label="Average Regret (GIRO; A = 1)")
+plt.title("Observed Regret of GIRO (with varying A) vs. UCB vs. Thompson Sampling on 10-armed (high-variance) Beta Bandit problem")
+
+plt.legend()
+plt.ylabel('Regret')
+plt.xlabel('Round n')
+plt.show()
+
+plt.plot(range(T), simulate_stochastic_bandit_problem(K= K, T = T, generate_reward = beta_bandit_factory(nu=16), compute_arm_estimates = UCB_arm_estimates_function), label="Average Regret (UCB)")
+plt.plot(range(T), simulate_stochastic_bandit_problem(K= K, T = T, generate_reward = beta_bandit_factory(nu=16, ts=True), compute_arm_estimates = TS_arm_estimates_function), label="Average Regret (Thompson Sampling)")
+plt.plot(range(T), simulate_stochastic_bandit_problem(K = K, T = T, generate_reward = beta_bandit_factory(nu=16), compute_arm_estimates = GIRO_arm_estimates_factory_function(0.5)), label="Average Regret (GIRO; A = 0.5)")
+plt.plot(range(T), simulate_stochastic_bandit_problem(K = K, T = T, generate_reward = beta_bandit_factory(nu=16), compute_arm_estimates = GIRO_arm_estimates_factory_function(0.1)), label="Average Regret (GIRO; A = 0.1)")
+plt.plot(range(T), simulate_stochastic_bandit_problem(K = K, T = T, generate_reward = beta_bandit_factory(nu=16), compute_arm_estimates = GIRO_arm_estimates_factory_function(1)), label="Average Regret (GIRO; A = 1)")
+plt.title("Observed Regret of GIRO (with varying A) vs. UCB vs. Thompson Sampling on 10-armed (low-variance) Beta Bandit problem")
+
+plt.legend()
+plt.ylabel('Regret')
+plt.xlabel('Round n')
 plt.show()
         
