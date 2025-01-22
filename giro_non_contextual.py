@@ -3,6 +3,7 @@ import matplotlib.pyplot as plt
 from numpy import random
 import math
 
+random.seed(885)
 
 def GIRO_arm_estimates_factory_function(A):
 
@@ -70,26 +71,48 @@ def TS_arm_estimates_function(history, t, N):
 
     return arm_estimates_current_round
 
-def bagging_from_future_arm_estimates(history, t, N):
-    num_arms = len(history)
-    arm_estimates_current_round = np.zeros(shape=K)
+def bagging_from_future_factory(initial_exploration):
 
-    for j in range(num_arms):
-        s = len(history[j])
+    def bagging_from_future_arm_estimates(history, t, N):
+        num_arms = len(history)
+        arm_estimates_current_round = np.zeros(shape=K)
 
-        if (s < 5):
-            arm_estimates_current_round[j] = np.inf
-        else:
-            rewards = np.zeros(shape=N)
-            uniform_sample = random.randint(low = 0, high = s-1, size = N - s)
-            for i in range(N):
-                if (i < s):
-                    rewards[i] = history[j][i]
-                else:
-                    rewards[i] = history[j][uniform_sample[i-s]]
-            arm_estimates_current_round[j] = np.mean(rewards)
+        for j in range(num_arms):
+            s = len(history[j])
 
-    return arm_estimates_current_round
+            if (s < initial_exploration):
+                arm_estimates_current_round[j] = np.inf
+            else:
+                rewards = np.zeros(shape=N)
+                uniform_sample = random.randint(low = 0, high = s, size = N - s)
+                for i in range(N):
+                    if (i < s):
+                        rewards[i] = history[j][i]
+                    else:
+                        rewards[i] = history[j][uniform_sample[i-s]]
+                arm_estimates_current_round[j] = np.mean(rewards)
+
+        return arm_estimates_current_round
+    
+    return bagging_from_future_arm_estimates
+
+def explore_then_commit_factory(initial_exploration):
+
+    def explore_then_commit(history, t, N):
+        num_arms = len(history)
+        arm_estimates_current_round = np.zeros(shape=K)
+
+        for j in range(num_arms):
+            s = len(history[j])
+
+            if (s < initial_exploration):
+                arm_estimates_current_round[j] = np.inf
+            else:
+                arm_estimates_current_round[j] = np.mean(history[j])
+        return arm_estimates_current_round
+    
+    return explore_then_commit
+
 
 def bernoulli_bandit(mu_i):
     return random.binomial(n=1, p = mu_i)
@@ -108,19 +131,12 @@ def beta_bandit_factory(nu, ts=False):
 # K-armed Bernoulli Bandit 
 # problem tackled using 
 # various algorithms
-def simulate_stochastic_bandit_problem(K, T, generate_reward, compute_arm_estimates, M=1000):
+def simulate_stochastic_bandit_problem(K, T, generate_reward, compute_arm_estimates, M=100):
 
     # data_structure to keep track of the
     # accumulated regret up to the current round
     # for M different runs
     accumulated_regret = np.zeros(shape=(M, T))
-
-    # Generate the means of the arms 
-    # using a Uniform distribution
-    arms_mean_lower_range = 0.25
-    arms_mean_upper_range = 0.75
-    arms_mean = np.flip(np.sort(random.uniform(arms_mean_lower_range, arms_mean_upper_range, size = K)))
-    optimal_arm_mean = arms_mean[0]
 
     for m in range(0, M):
         # initialize the data_structures
@@ -146,7 +162,7 @@ def simulate_stochastic_bandit_problem(K, T, generate_reward, compute_arm_estima
 
             # add to accumulated regret only if 
             # optimal arm was not chosen this round 
-            if (I_t != 0):
+            if (I_t != optimal_arm_mean_index):
                 sub_optimality_gap = (optimal_arm_mean - arms_mean[I_t]) 
                 if (i == 0):
                     accumulated_regret[m][i] = sub_optimality_gap
@@ -164,12 +180,22 @@ def simulate_stochastic_bandit_problem(K, T, generate_reward, compute_arm_estima
 T = 500
 K = 10
 
-plt.plot(range(T), simulate_stochastic_bandit_problem(K = K, T = T, generate_reward = bernoulli_bandit, compute_arm_estimates = bagging_from_future_arm_estimates), label="Average Regret (BF)")
+# Generate the means of the arms 
+# using a Uniform distribution
+arms_mean_lower_range = 0.25
+arms_mean_upper_range = 0.75
+arms_mean = random.uniform(arms_mean_lower_range, arms_mean_upper_range, size = K)
+optimal_arm_mean_index = np.argmax(arms_mean)
+optimal_arm_mean = arms_mean[optimal_arm_mean_index]
+
+""" simulate_stochastic_bandit_problem(K=K, T=T, generate_reward=bernoulli_bandit, compute_arm_estimates=bagging_from_future_arm_estimates, M=1) """
+
+plt.plot(range(T), simulate_stochastic_bandit_problem(K = K, T = T, generate_reward = bernoulli_bandit, compute_arm_estimates = bagging_from_future_factory(5)), label="Average Regret (BF)")
+plt.plot(range(T), simulate_stochastic_bandit_problem(K = K, T = T, generate_reward = bernoulli_bandit, compute_arm_estimates = explore_then_commit_factory(5)), label="Average Regret (ETC)")
 plt.plot(range(T), simulate_stochastic_bandit_problem(K= K, T = T, generate_reward = bernoulli_bandit, compute_arm_estimates = UCB_arm_estimates_function), label="Average Regret (UCB)")
 plt.plot(range(T), simulate_stochastic_bandit_problem(K= K, T = T, generate_reward = bernoulli_bandit, compute_arm_estimates = TS_arm_estimates_function), label="Average Regret (Thompson Sampling)")
-plt.plot(range(T), simulate_stochastic_bandit_problem(K = K, T = T, generate_reward = bernoulli_bandit, compute_arm_estimates = GIRO_arm_estimates_factory_function(0.5)), label="Average Regret (GIRO; A = 0.5)")
-plt.plot(range(T), simulate_stochastic_bandit_problem(K = K, T = T, generate_reward = bernoulli_bandit, compute_arm_estimates = GIRO_arm_estimates_factory_function(0.1)), label="Average Regret (GIRO; A = 0.1)")
 plt.plot(range(T), simulate_stochastic_bandit_problem(K = K, T = T, generate_reward = bernoulli_bandit, compute_arm_estimates = GIRO_arm_estimates_factory_function(1)), label="Average Regret (GIRO; A = 1)")
+plt.plot(range(T), simulate_stochastic_bandit_problem(K = K, T = T, generate_reward = bernoulli_bandit, compute_arm_estimates = GIRO_arm_estimates_factory_function(0.1)), label="Average Regret (GIRO; A = 0.1)")
 plt.title("Observed Regret of GIRO (with varying A) vs. UCB vs. Thompson Sampling vs. Bagging from Future on 10-armed Bernoulli Bandit problem")
 
 plt.legend()
@@ -177,11 +203,10 @@ plt.ylabel('Regret')
 plt.xlabel('Round n')
 plt.show()
 
-plt.plot(range(T), simulate_stochastic_bandit_problem(K = K, T = T, generate_reward = beta_bandit_factory(nu=4), compute_arm_estimates = bagging_from_future_arm_estimates), label="Average Regret (BF)")
+plt.plot(range(T), simulate_stochastic_bandit_problem(K = K, T = T, generate_reward = beta_bandit_factory(nu=4), compute_arm_estimates = bagging_from_future_factory(5)), label="Average Regret (BF)")
+plt.plot(range(T), simulate_stochastic_bandit_problem(K = K, T = T, generate_reward = bernoulli_bandit, compute_arm_estimates = explore_then_commit_factory(5)), label="Average Regret (ETC)")
 plt.plot(range(T), simulate_stochastic_bandit_problem(K= K, T = T, generate_reward = beta_bandit_factory(nu=4), compute_arm_estimates = UCB_arm_estimates_function), label="Average Regret (UCB)")
 plt.plot(range(T), simulate_stochastic_bandit_problem(K= K, T = T, generate_reward = beta_bandit_factory(nu=4, ts=True), compute_arm_estimates = TS_arm_estimates_function), label="Average Regret (Thompson Sampling)")
-plt.plot(range(T), simulate_stochastic_bandit_problem(K = K, T = T, generate_reward = beta_bandit_factory(nu=4), compute_arm_estimates = GIRO_arm_estimates_factory_function(0.5)), label="Average Regret (GIRO; A = 0.5)")
-plt.plot(range(T), simulate_stochastic_bandit_problem(K = K, T = T, generate_reward = beta_bandit_factory(nu=4), compute_arm_estimates = GIRO_arm_estimates_factory_function(0.1)), label="Average Regret (GIRO; A = 0.1)")
 plt.plot(range(T), simulate_stochastic_bandit_problem(K = K, T = T, generate_reward = beta_bandit_factory(nu=4), compute_arm_estimates = GIRO_arm_estimates_factory_function(1)), label="Average Regret (GIRO; A = 1)")
 plt.title("Observed Regret of GIRO (with varying A) vs. UCB vs. Thompson Sampling vs. Bagging from Future on 10-armed (high-variance) Beta Bandit problem")
 
@@ -190,11 +215,10 @@ plt.ylabel('Regret')
 plt.xlabel('Round n')
 plt.show()
 
-plt.plot(range(T), simulate_stochastic_bandit_problem(K = K, T = T, generate_reward = beta_bandit_factory(nu=16), compute_arm_estimates = bagging_from_future_arm_estimates), label="Average Regret (BF)")
+plt.plot(range(T), simulate_stochastic_bandit_problem(K = K, T = T, generate_reward = beta_bandit_factory(nu=16), compute_arm_estimates = bagging_from_future_factory(5)), label="Average Regret (BF)")
+plt.plot(range(T), simulate_stochastic_bandit_problem(K = K, T = T, generate_reward = beta_bandit_factory(nu=16), compute_arm_estimates = explore_then_commit_factory(5)), label="Average Regret (ETC)")
 plt.plot(range(T), simulate_stochastic_bandit_problem(K= K, T = T, generate_reward = beta_bandit_factory(nu=16), compute_arm_estimates = UCB_arm_estimates_function), label="Average Regret (UCB)")
 plt.plot(range(T), simulate_stochastic_bandit_problem(K= K, T = T, generate_reward = beta_bandit_factory(nu=16, ts=True), compute_arm_estimates = TS_arm_estimates_function), label="Average Regret (Thompson Sampling)")
-plt.plot(range(T), simulate_stochastic_bandit_problem(K = K, T = T, generate_reward = beta_bandit_factory(nu=16), compute_arm_estimates = GIRO_arm_estimates_factory_function(0.5)), label="Average Regret (GIRO; A = 0.5)")
-plt.plot(range(T), simulate_stochastic_bandit_problem(K = K, T = T, generate_reward = beta_bandit_factory(nu=16), compute_arm_estimates = GIRO_arm_estimates_factory_function(0.1)), label="Average Regret (GIRO; A = 0.1)")
 plt.plot(range(T), simulate_stochastic_bandit_problem(K = K, T = T, generate_reward = beta_bandit_factory(nu=16), compute_arm_estimates = GIRO_arm_estimates_factory_function(1)), label="Average Regret (GIRO; A = 1)")
 plt.title("Observed Regret of GIRO (with varying A) vs. UCB vs. Thompson Sampling vs. Bagging from Future on 10-armed (low-variance) Beta Bandit problem")
 
