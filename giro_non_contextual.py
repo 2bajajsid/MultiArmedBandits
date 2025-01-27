@@ -209,17 +209,8 @@ def simulate_full_information_problem(K, T, generate_rewards, compute_arm_estima
 T = 500
 K = 10
 
-# Generate the means of the arms 
-# using a Uniform distribution
-arms_mean_lower_range = 0.25
-arms_mean_upper_range = 0.75
-arms_mean = random.uniform(arms_mean_lower_range, arms_mean_upper_range, size = K)
-optimal_arm_mean_index = np.argmax(arms_mean)
-optimal_arm_mean = arms_mean[optimal_arm_mean_index]
-
-""" print("Optimal Arm")
-print(np.flip(np.argsort(arms_mean))[0:2]) """
-
+# Let the means of all the arms be 0.5 to simulate adversarial data
+""" arms_mean = np.full(shape = K, fill_value = 0.333)
 
 plt.plot(range(T), simulate_full_information_problem(K = K, T = T, generate_rewards = bernoulli_bandit, compute_arm_estimates = bagging_from_past_into_future_factory(5)), label="Average Regret (BF)")
 plt.plot(range(T), simulate_full_information_problem(K = K, T = T, generate_rewards = bernoulli_bandit, compute_arm_estimates = explore_then_commit_factory(5)), label="Average Regret (ETC)")
@@ -227,7 +218,7 @@ plt.plot(range(T), simulate_full_information_problem(K= K, T = T, generate_rewar
 plt.plot(range(T), simulate_full_information_problem(K= K, T = T, generate_rewards = bernoulli_bandit, compute_arm_estimates = TS_arm_estimates_function), label="Average Regret (Thompson Sampling)")
 plt.plot(range(T), simulate_full_information_problem(K = K, T = T, generate_rewards = bernoulli_bandit, compute_arm_estimates = GIRO_arm_estimates_factory_function(1)), label="Average Regret (GIRO; A = 1)")
 plt.plot(range(T), simulate_full_information_problem(K = K, T = T, generate_rewards = bernoulli_bandit, compute_arm_estimates = GIRO_arm_estimates_factory_function(0.1)), label="Average Regret (GIRO; A = 0.1)")
-plt.title("Observed Regret of GIRO (with varying A) vs. UCB vs. Thompson Sampling vs. Bagging from Future on 10-armed Bernoulli Bandit problem")
+plt.title("Averaged Regret on the Full-Information Adversarial Bernoulli Bandit problem")
 
 plt.legend()
 plt.ylabel('Regret')
@@ -235,11 +226,10 @@ plt.xlabel('Round n')
 plt.show()
 
 plt.plot(range(T), simulate_full_information_problem(K = K, T = T, generate_rewards = beta_bandit_factory(nu=4), compute_arm_estimates = bagging_from_past_into_future_factory(5)), label="Average Regret (BF)")
-plt.plot(range(T), simulate_full_information_problem(K = K, T = T, generate_rewards = beta_bandit_factory(nu = 4), compute_arm_estimates = explore_then_commit_factory(5)), label="Average Regret (ETC)")
+plt.plot(range(T), simulate_full_information_problem(K = K, T = T, generate_rewards = beta_bandit_factory(nu=4), compute_arm_estimates = explore_then_commit_factory(5)), label="Average Regret (ETC)")
 plt.plot(range(T), simulate_full_information_problem(K= K, T = T, generate_rewards = beta_bandit_factory(nu=4), compute_arm_estimates = UCB_arm_estimates_function), label="Average Regret (UCB)")
 plt.plot(range(T), simulate_full_information_problem(K= K, T = T, generate_rewards = beta_bandit_factory(nu=4, ts=True), compute_arm_estimates = TS_arm_estimates_function, ts=True), label="Average Regret (Thompson Sampling)")
-#plt.plot(range(T), simulate_full_information_problem(K = K, T = T, generate_rewards = beta_bandit_factory(nu=4), compute_arm_estimates = GIRO_arm_estimates_factory_function(1)), label="Average Regret (GIRO; A = 1)")
-plt.title("Observed Regret of GIRO (with varying A) vs. UCB vs. Thompson Sampling vs. Bagging from Future on 10-armed (high-variance) Beta Bandit problem")
+plt.title("Averaged Regret on the Full-Information Adversarial Beta Bandit (high-variance) problem")
 
 plt.legend()
 plt.ylabel('Regret')
@@ -250,8 +240,50 @@ plt.plot(range(T), simulate_full_information_problem(K = K, T = T, generate_rewa
 plt.plot(range(T), simulate_full_information_problem(K = K, T = T, generate_rewards = beta_bandit_factory(nu=16), compute_arm_estimates = explore_then_commit_factory(5)), label="Average Regret (ETC)")
 plt.plot(range(T), simulate_full_information_problem(K= K, T = T, generate_rewards = beta_bandit_factory(nu=16), compute_arm_estimates = UCB_arm_estimates_function), label="Average Regret (UCB)")
 plt.plot(range(T), simulate_full_information_problem(K= K, T = T, generate_rewards = beta_bandit_factory(nu=16, ts=True), compute_arm_estimates = TS_arm_estimates_function, ts=True), label="Average Regret (Thompson Sampling)")
-#plt.plot(range(T), simulate_full_information_problem(K = K, T = T, generate_rewards = beta_bandit_factory(nu=16), compute_arm_estimates = GIRO_arm_estimates_factory_function(1)), label="Average Regret (GIRO; A = 1)")
-plt.title("Observed Regret of GIRO (with varying A) vs. UCB vs. Thompson Sampling vs. Bagging from Future on 10-armed (low-variance) Beta Bandit problem")
+plt.title("Averaged Regret on the Full-Information Adversarial Beta Bandit (low-variance) problem")
+
+plt.legend()
+plt.ylabel('Regret')
+plt.xlabel('Round n')
+plt.show() """
+
+# Generate the means of the arms 
+# using a Uniform distribution
+arms_mean_lower_range = 0.25
+arms_mean_upper_range = 0.75
+arms_mean = random.uniform(arms_mean_lower_range, arms_mean_upper_range, size = K)
+optimal_arm_mean_index = np.argmax(arms_mean)
+optimal_arm_mean = arms_mean[optimal_arm_mean_index]
+
+""" plt.plot(range(T), simulate_full_information_problem(K = K, T = T, generate_rewards = bernoulli_bandit, compute_arm_estimates = bagging_from_past_into_future_factory(5)), label="Average Regret (BF)")
+plt.plot(range(T), simulate_full_information_problem(K = K, T = T, generate_rewards = bernoulli_bandit, compute_arm_estimates = explore_then_commit_factory(5)), label="Average Regret (ETC)")
+plt.plot(range(T), simulate_full_information_problem(K= K, T = T, generate_rewards = bernoulli_bandit, compute_arm_estimates = UCB_arm_estimates_function), label="Average Regret (UCB)")
+plt.plot(range(T), simulate_full_information_problem(K= K, T = T, generate_rewards = bernoulli_bandit, compute_arm_estimates = TS_arm_estimates_function), label="Average Regret (Thompson Sampling)")
+plt.plot(range(T), simulate_full_information_problem(K = K, T = T, generate_rewards = bernoulli_bandit, compute_arm_estimates = GIRO_arm_estimates_factory_function(1)), label="Average Regret (GIRO; A = 1)")
+plt.plot(range(T), simulate_full_information_problem(K = K, T = T, generate_rewards = bernoulli_bandit, compute_arm_estimates = GIRO_arm_estimates_factory_function(0.1)), label="Average Regret (GIRO; A = 0.1)")
+plt.title("Averaged Regret on the Full-Information Stochastic Bernoulli Bandit problem")
+
+plt.legend()
+plt.ylabel('Regret')
+plt.xlabel('Round n')
+plt.show() """
+
+plt.plot(range(T), simulate_full_information_problem(K = K, T = T, generate_rewards = beta_bandit_factory(nu=4), compute_arm_estimates = bagging_from_past_into_future_factory(5)), label="Average Regret (BF)")
+plt.plot(range(T), simulate_full_information_problem(K = K, T = T, generate_rewards = beta_bandit_factory(nu = 4), compute_arm_estimates = explore_then_commit_factory(5)), label="Average Regret (ETC)")
+plt.plot(range(T), simulate_full_information_problem(K= K, T = T, generate_rewards = beta_bandit_factory(nu=4), compute_arm_estimates = UCB_arm_estimates_function), label="Average Regret (UCB)")
+plt.plot(range(T), simulate_full_information_problem(K= K, T = T, generate_rewards = beta_bandit_factory(nu=4, ts=True), compute_arm_estimates = TS_arm_estimates_function, ts=True), label="Average Regret (Thompson Sampling)")
+plt.title("Averaged Regret on the Full-Information Stochastic Beta Bandit (high-variance) problem")
+
+plt.legend()
+plt.ylabel('Regret')
+plt.xlabel('Round n')
+plt.show()
+
+plt.plot(range(T), simulate_full_information_problem(K = K, T = T, generate_rewards = beta_bandit_factory(nu=16), compute_arm_estimates = bagging_from_past_into_future_factory(5)), label="Average Regret (BF)")
+plt.plot(range(T), simulate_full_information_problem(K = K, T = T, generate_rewards = beta_bandit_factory(nu=16), compute_arm_estimates = explore_then_commit_factory(5)), label="Average Regret (ETC)")
+plt.plot(range(T), simulate_full_information_problem(K= K, T = T, generate_rewards = beta_bandit_factory(nu=16), compute_arm_estimates = UCB_arm_estimates_function), label="Average Regret (UCB)")
+plt.plot(range(T), simulate_full_information_problem(K= K, T = T, generate_rewards = beta_bandit_factory(nu=16, ts=True), compute_arm_estimates = TS_arm_estimates_function, ts=True), label="Average Regret (Thompson Sampling)")
+plt.title("Averaged Regret on the Full-Information Stochastic Beta Bandit (low-variance) problem")
 
 plt.legend()
 plt.ylabel('Regret')
