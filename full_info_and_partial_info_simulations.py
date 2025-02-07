@@ -2,6 +2,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 from numpy import random
 from itertools import chain
+from scipy.optimize import Bounds, LinearConstraint, root_scalar
 import math
 
 random.seed(895)
@@ -117,7 +118,7 @@ def bagging_from_past_into_future_factory(initial_exploration, partial_info = Fa
         for n in range(num_bootstrap_simulations):
             uniform_sample = list(random.randint(low = 0, high = t, size = N - t))
             arm_estimates_current_simulation = np.mean(importance_weighted_history[:, list(range(t)) + uniform_sample], axis = 1)
-            arm_chosen_this_simulation = np.argmax(-1 * arm_estimates_current_simulation)
+            arm_chosen_this_simulation = np.argmin(arm_estimates_current_simulation)
             num_counts[arm_chosen_this_simulation] = num_counts[arm_chosen_this_simulation] + 1
             if (num_bootstrap_simulations == n + 1):
                 A_t = arm_chosen_this_simulation
@@ -220,7 +221,7 @@ def exp3_plus_plus(importance_weighted_history, unweighted_history, t, N, k):
         LCB_t[a] = max(0, (cumulative_losses[a] / N_t_minus_one[a]) - margin_confidence_interval)
 
     for a in range(k):
-        delta_t[a] = max(0, LCB_t[a] - min(UCB_t))
+        delta_t[a] = max(0.00001, LCB_t[a] - min(UCB_t))
         eta_t[a] = (beta * math.log(t)) / (t * (delta_t[a])**2)
         epsilon_t[a] = min(1 / (2*k), (1 / 2) * (math.sqrt(math.log(k) / (t * k))), eta_t[a])
 
@@ -260,27 +261,49 @@ def tsallis_inf_factory(partial_info = False):
 
     return tsallis_inf
 
+def objective_func(L_t, neta_t, w_t):
+    first_term = np.dot(-1 * L_t, w_t)
+    second_term = (4 / neta_t) * sum(np.sqrt(w_t))
+    return first_term + second_term
+
+def find_max_extreme_point(L_t, neta_t):
+    k = len(L_t)
+    vals = np.zeros(shape = k)
+
+    for i in range(k):
+        e_i = np.zeros(shape = k)
+        e_i[i] = 1
+        vals[i] = objective_func(L_t, neta_t, e_i)
+
+    e_i = np.zeros(shape = k)
+    e_i[np.argmax(vals)] = 1
+
+    return e_i
+
+glob_starting_point = 0
+
 # Implementing Newton-Raphson helper for solving the
 # OMD optimization step as specified in 
 # Zimmert and Seldin (2022)
 def compute_p_t(cumulative_losses, neta_t):
-    curr_x = 1/2
+    global glob_starting_point
+    
     temp_x = np.inf 
     w_t = np.zeros(shape = len(cumulative_losses))
 
-    while (abs(curr_x - temp_x) > 0.0005):
+    while (abs(glob_starting_point - temp_x) > 0.0005):
         if (temp_x < np.inf):
-            curr_x = temp_x
+            glob_starting_point = temp_x
         
         for i in range(len(cumulative_losses)):
-            w_t[i] = 4 * (1 / (neta_t * (cumulative_losses[i] - curr_x))**2)
+            w_t[i] = 4 * (1 / (neta_t * (cumulative_losses[i] - glob_starting_point))**2)
         
         denom = (neta_t * sum(w_t ** (3/2)))
 
-        if (denom < 0.1):
-            denom = 0.1
-
-        temp_x = curr_x - ((sum(w_t) - 1) / denom)
+        if (denom < 0.0001):
+            return find_max_extreme_point(cumulative_losses, neta_t)
+        
+        temp_x = glob_starting_point - ((sum(w_t) - 1) / denom)
 
     return w_t
 
@@ -449,30 +472,24 @@ T = 1000
 K = 10
 
 arms_mean = np.random.uniform(low = 0.1, high = 0.5, size = K)
-arms_mean[4] = 0.54
-arms_mean[7] = 0.86
+arms_mean[4] = 0.75
 
 plt.rcParams["figure.figsize"] = (15,6)
 
-plt.plot(range(T), simulate_partial_information_problem(K = K, T = T, generate_rewards = stochastically_constrained_adversarial, 
-                                                        get_arm_and_weight_to_pull = bagging_from_past_into_future_factory(5, partial_info=True)), label="Bagging from the Past")
-plt.plot(range(T), simulate_partial_information_problem(K = K, T = T, generate_rewards = stochastically_constrained_adversarial, 
-                                                        get_arm_and_weight_to_pull = tsallis_inf_factory(partial_info=True)), label="Tsallis-Inf")
-plt.plot(range(T), simulate_partial_information_problem(K = K, T = T, generate_rewards = stochastically_constrained_adversarial, 
-                                                        get_arm_and_weight_to_pull = exp3), label="Exp3")
-plt.plot(range(T), simulate_partial_information_problem(K = K, T = T, generate_rewards = stochastically_constrained_adversarial, 
-                                                        get_arm_and_weight_to_pull = exp3_plus_plus), label="Exp3++")
-plt.plot(range(T), simulate_partial_information_problem(K = K, T = T, generate_rewards = stochastically_constrained_adversarial, get_arm_and_weight_to_pull = UCB_factory(partial_info = True)), label="UCB")
-plt.title("Averaged Regret on a Partial-Information Stochastically Constrained Adversarial Problem")
+plt.plot(range(T), simulate_partial_information_problem(K = K, T = T, generate_rewards = bernoulli_bandit, get_arm_and_weight_to_pull = tsallis_inf_factory(partial_info=True)), label="Tsallis-Inf")
+plt.plot(range(T), simulate_partial_information_problem(K = K, T = T, generate_rewards = bernoulli_bandit, get_arm_and_weight_to_pull = bagging_from_past_into_future_factory(5, partial_info=True)), label="Bagging from the Past")
+plt.plot(range(T), simulate_partial_information_problem(K = K, T = T, generate_rewards = bernoulli_bandit, get_arm_and_weight_to_pull = explore_then_commit_factory(5, partial_info=True)), label="ETC")
+plt.plot(range(T), simulate_partial_information_problem(K = K, T = T, generate_rewards = bernoulli_bandit, get_arm_and_weight_to_pull = UCB_factory(partial_info=True)), label="UCB")
+plt.plot(range(T), simulate_partial_information_problem(K = K, T = T, generate_rewards = bernoulli_bandit, get_arm_and_weight_to_pull = exp3), label="Exp3")
+plt.plot(range(T), simulate_partial_information_problem(K = K, T = T, generate_rewards = bernoulli_bandit, get_arm_and_weight_to_pull = exp3_plus_plus), label="Exp3++")
+plt.title("Averaged Regret on the Partial-Information Stochastic Bernoulli Bandit problem (Delta > 0.25)")
 
 plt.legend()
 plt.ylabel('Regret')
 plt.xlabel('Round n')
-plt.savefig('PI Stochastically Constrained Adversarial Regime')
+plt.savefig('PI High-Gap Stochastic Problem')
 plt.close()
 
-arms_mean = np.random.uniform(low = 0.1, high = 0.5, size = K)
-arms_mean[4] = 0.75
 
 plt.plot(range(T), simulate_full_information_problem(K = K, T = T, generate_rewards = bernoulli_bandit, get_arm_to_pull = tsallis_inf_factory(partial_info = False)), label="Tsallis-Inf")
 plt.plot(range(T), simulate_full_information_problem(K = K, T = T, generate_rewards = bernoulli_bandit, get_arm_to_pull = bagging_from_past_into_future_factory(5, partial_info=False)), label="Bagging from the Past")
@@ -484,18 +501,30 @@ plt.title("Averaged Regret on the Full-Information Stochastic Bernoulli Bandit p
 plt.ylabel('Regret')
 plt.xlabel('Round n')
 plt.savefig('FI High-Gap Stochastic Problem')
-plt.close() 
+plt.close()
 
-plt.plot(range(T), simulate_partial_information_problem(K = K, T = T, generate_rewards = bernoulli_bandit, get_arm_and_weight_to_pull = bagging_from_past_into_future_factory(5, partial_info=True)), label="Bagging from the Past")
-plt.plot(range(T), simulate_partial_information_problem(K = K, T = T, generate_rewards = bernoulli_bandit, get_arm_and_weight_to_pull = explore_then_commit_factory(5, partial_info=True)), label="ETC")
-plt.plot(range(T), simulate_partial_information_problem(K = K, T = T, generate_rewards = bernoulli_bandit, get_arm_and_weight_to_pull = UCB_factory(partial_info=True)), label="UCB")
-plt.plot(range(T), simulate_partial_information_problem(K = K, T = T, generate_rewards = bernoulli_bandit, get_arm_and_weight_to_pull = tsallis_inf_factory(partial_info=True)), label="Tsallis-Inf")
-plt.plot(range(T), simulate_partial_information_problem(K = K, T = T, generate_rewards = bernoulli_bandit, get_arm_and_weight_to_pull = exp3), label="Exp3")
-plt.plot(range(T), simulate_partial_information_problem(K = K, T = T, generate_rewards = bernoulli_bandit, get_arm_and_weight_to_pull = exp3_plus_plus), label="Exp3++")
-plt.title("Averaged Regret on the Partial-Information Stochastic Bernoulli Bandit problem (Delta > 0.25)")
+arms_mean = np.random.uniform(low = 0.1, high = 0.5, size = K)
+arms_mean[4] = 0.54
+arms_mean[7] = 0.86
 
+plt.plot(range(T), simulate_partial_information_problem(K = K, T = T, generate_rewards = stochastically_constrained_adversarial, 
+                                                        get_arm_and_weight_to_pull = bagging_from_past_into_future_factory(5, partial_info=True)), 
+                                                        label="Bagging from the Past")
+plt.plot(range(T), simulate_partial_information_problem(K = K, T = T, generate_rewards = stochastically_constrained_adversarial, 
+                                                        get_arm_and_weight_to_pull = tsallis_inf_factory(partial_info=True)), 
+                                                        label="Tsallis-Inf")
+plt.plot(range(T), simulate_partial_information_problem(K = K, T = T, generate_rewards = stochastically_constrained_adversarial, 
+                                                        get_arm_and_weight_to_pull = exp3), 
+                                                        label="Exp3")
+plt.plot(range(T), simulate_partial_information_problem(K = K, T = T, generate_rewards = stochastically_constrained_adversarial, 
+                                                        get_arm_and_weight_to_pull = exp3_plus_plus), 
+                                                        label="Exp3++")
+plt.plot(range(T), simulate_partial_information_problem(K = K, T = T, generate_rewards = stochastically_constrained_adversarial, 
+                                                        get_arm_and_weight_to_pull = UCB_factory(partial_info = True)), 
+                                                        label="UCB")
+plt.title("Averaged Regret on a Partial-Information Stochastically Constrained Adversarial Problem")
 plt.legend()
 plt.ylabel('Regret')
 plt.xlabel('Round n')
-plt.savefig('PI High-Gap Stochastic Problem')
-plt.close() 
+plt.savefig('PI Stochastically Constrained Adversarial Regime')
+plt.close()
