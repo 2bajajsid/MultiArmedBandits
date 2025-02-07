@@ -138,6 +138,56 @@ def bagging_from_past_into_future_factory(initial_exploration, partial_info = Fa
 
     return bagging_from_past_into_future
 
+def dropout_factory(initial_exploration, partial_info = False, prob = 1/2):
+
+    def dropout(importance_weighted_history, stochastic_history, t, N, k):
+        if (t < initial_exploration * k):
+            if (partial_info == False):
+                return math.floor(t / initial_exploration)
+            else:
+                one_hot = np.zeros(shape = k)
+                one_hot[math.floor(t / initial_exploration)] = 1
+                return [math.floor(t / initial_exploration), one_hot]
+
+        num_counts = np.zeros(shape = k)
+        num_bootstrap_simulations = 100
+
+        A_t = 0
+
+        if (partial_info == False):
+            uniform_sample = list(random.choice(t, size = math.floor(t * prob), replace = False))
+            stochastic_history[:, uniform_sample] = np.zeros(shape = (k, math.floor(t * prob)))
+            arm_estimates_current_round = np.mean(stochastic_history, axis = 1)
+            return np.argmin(arm_estimates_current_round)
+
+        for n in range(num_bootstrap_simulations):
+            copied_history = np.copy(importance_weighted_history)
+            uniform_sample = list(random.choice(t, size = math.floor(t * prob), replace=False))
+
+            for j in range(len(uniform_sample)):
+                copied_history[:, uniform_sample[j]] = np.zeros(shape = (k))
+
+            arm_estimates_current_simulation = np.mean(copied_history, axis = 1)
+            arm_chosen_this_simulation = np.argmin(arm_estimates_current_simulation)
+            num_counts[arm_chosen_this_simulation] = num_counts[arm_chosen_this_simulation] + 1
+            if (num_bootstrap_simulations == n + 1):
+                A_t = arm_chosen_this_simulation
+                
+        p_t = num_counts / num_bootstrap_simulations
+        
+        # flip a bernoulli with success 
+        # probability of 1/t to add an 
+        # explicit exploration component
+        z = np.random.binomial(n = 1, p = (1 / t))
+        p_t = ((1 - (1 / t)) * p_t) + (1 / (t * k))
+
+        if (z == 1):
+            return [random.randint(low = 0, high = k, size = 1), p_t]
+        else:
+            return [A_t, p_t]
+
+    return dropout
+
 
 def explore_then_commit_factory(initial_exploration, partial_info = False):
 
@@ -475,7 +525,7 @@ arms_mean = np.random.uniform(low = 0.1, high = 0.5, size = K)
 arms_mean[4] = 0.75
 
 plt.rcParams["figure.figsize"] = (15,6)
-
+""" 
 plt.plot(range(T), simulate_partial_information_problem(K = K, T = T, generate_rewards = bernoulli_bandit, get_arm_and_weight_to_pull = tsallis_inf_factory(partial_info=True)), label="Tsallis-Inf")
 plt.plot(range(T), simulate_partial_information_problem(K = K, T = T, generate_rewards = bernoulli_bandit, get_arm_and_weight_to_pull = bagging_from_past_into_future_factory(5, partial_info=True)), label="Bagging from the Past")
 plt.plot(range(T), simulate_partial_information_problem(K = K, T = T, generate_rewards = bernoulli_bandit, get_arm_and_weight_to_pull = explore_then_commit_factory(5, partial_info=True)), label="ETC")
@@ -501,16 +551,22 @@ plt.title("Averaged Regret on the Full-Information Stochastic Bernoulli Bandit p
 plt.ylabel('Regret')
 plt.xlabel('Round n')
 plt.savefig('FI High-Gap Stochastic Problem')
-plt.close()
+plt.close() """
 
 arms_mean = np.random.uniform(low = 0.1, high = 0.5, size = K)
 arms_mean[4] = 0.54
 arms_mean[7] = 0.86
 
 plt.plot(range(T), simulate_partial_information_problem(K = K, T = T, generate_rewards = stochastically_constrained_adversarial, 
+                                                        get_arm_and_weight_to_pull = dropout_factory(5, partial_info=True, prob=0.1)), 
+                                                        label="DropOut (0.1)")
+plt.plot(range(T), simulate_partial_information_problem(K = K, T = T, generate_rewards = stochastically_constrained_adversarial, 
+                                                        get_arm_and_weight_to_pull = dropout_factory(5, partial_info=True, prob=0.05)), 
+                                                        label="DropOut (0.05)")
+plt.plot(range(T), simulate_partial_information_problem(K = K, T = T, generate_rewards = stochastically_constrained_adversarial, 
                                                         get_arm_and_weight_to_pull = bagging_from_past_into_future_factory(5, partial_info=True)), 
                                                         label="Bagging from the Past")
-plt.plot(range(T), simulate_partial_information_problem(K = K, T = T, generate_rewards = stochastically_constrained_adversarial, 
+""" plt.plot(range(T), simulate_partial_information_problem(K = K, T = T, generate_rewards = stochastically_constrained_adversarial, 
                                                         get_arm_and_weight_to_pull = tsallis_inf_factory(partial_info=True)), 
                                                         label="Tsallis-Inf")
 plt.plot(range(T), simulate_partial_information_problem(K = K, T = T, generate_rewards = stochastically_constrained_adversarial, 
@@ -521,10 +577,10 @@ plt.plot(range(T), simulate_partial_information_problem(K = K, T = T, generate_r
                                                         label="Exp3++")
 plt.plot(range(T), simulate_partial_information_problem(K = K, T = T, generate_rewards = stochastically_constrained_adversarial, 
                                                         get_arm_and_weight_to_pull = UCB_factory(partial_info = True)), 
-                                                        label="UCB")
+                                                        label="UCB") """
 plt.title("Averaged Regret on a Partial-Information Stochastically Constrained Adversarial Problem")
 plt.legend()
 plt.ylabel('Regret')
 plt.xlabel('Round n')
-plt.savefig('PI Stochastically Constrained Adversarial Regime')
+plt.savefig('PCI SCA - DropOut vs Bagging from the Past')
 plt.close()
