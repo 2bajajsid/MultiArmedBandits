@@ -1,46 +1,34 @@
 import numpy as np
 import matplotlib.pyplot as plt
 from numpy import random
-from itertools import chain
-from scipy.optimize import Bounds, LinearConstraint, root_scalar
+from high_gap_stochastic import High_Gap_Stochastic
+from stochastically_constrained import Stochastically_Constrained
+from partial_info_play_ground import Partial_Info_Play_Ground
+from ucb import UCB
+from explore_then_commit import Explore_Then_Commit
+from exp_3 import Exp3
+from exp_3_plus_plus import Exp3_plus_plus
+from tsallis_inf import Tsallis_Inf
 import math
 
-arms_mean = np.random.uniform(low = 0.1, high = 0.5, size = K)
-arms_mean[4] = 0.75
+high_gap_stochastic_data_job = High_Gap_Stochastic()
+ucb_algorithm = UCB(high_gap_stochastic_data_job)
+explore_then_commit_algo = Explore_Then_Commit(high_gap_stochastic_data_job)
+exp3 = Exp3(high_gap_stochastic_data_job)
+exp3_plus_plus = Exp3_plus_plus(high_gap_stochastic_data_job)
+tsallis_inf = Tsallis_Inf(high_gap_stochastic_data_job)
+partial_info_ground = Partial_Info_Play_Ground(high_gap_stochastic_data_job, 
+                                               [tsallis_inf, ucb_algorithm, explore_then_commit_algo, exp3, exp3_plus_plus], 
+                                               plot_label="High Gap Stochastic Partial Info Game")
+partial_info_ground.plot_results()
 
-plt.rcParams["figure.figsize"] = (15,6)
-""" plt.plot(range(T), simulate_full_information_problem(K = K, T = T, generate_rewards = bernoulli_bandit, 
-                                                    get_arm_to_pull = bagging_from_past_v_old_factory(5)), 
-                                                    label="b_from_past_v1")
-plt.plot(range(T), simulate_full_information_problem(K = K, T = T, generate_rewards = bernoulli_bandit, 
-                                                    get_arm_to_pull = bagging_from_past_into_future_factory(5)), 
-                                                    label="b_from_past_v2")
-plt.plot(range(T), simulate_full_information_problem(K = K, T = T, generate_rewards = bernoulli_bandit, 
-                                                    get_arm_to_pull = dropout_factory(5, prob=0.05)), 
-                                                    label="DropOut (0.05)")
-plt.legend()
-plt.title("Averaged Regret on the Full-Information Stochastic Bernoulli Bandit problem (Delta > 0.25)")
-plt.ylabel('Regret')
-plt.xlabel('Round n')
-plt.savefig('FI High-Gap Stochastic Problem')
-plt.close() """
- 
-plt.plot(range(T), simulate_partial_information_problem(K = K, T = T, generate_rewards = bernoulli_bandit,
-                                                        get_arm_and_weight_to_pull = bagging_from_past_v_old_factory(5, partial_info=True)), 
-                                                        label="b_from_past_v1")
-plt.plot(range(T), simulate_partial_information_problem(K = K, T = T, generate_rewards = bernoulli_bandit, 
-                                                        get_arm_and_weight_to_pull = bagging_from_past_into_future_factory(5, partial_info=True)), 
-                                                        label="b_from_past_v2")
-plt.plot(range(T), simulate_partial_information_problem(K = K, T = T, generate_rewards = bernoulli_bandit, 
-                                                        get_arm_and_weight_to_pull = dropout_factory(5, partial_info=True, prob=0.05)), 
-                                                        label="DropOut (0.05)")
-plt.plot(range(T), simulate_partial_information_problem(K = K, T = T, generate_rewards = bernoulli_bandit, 
-                                                        get_arm_and_weight_to_pull = exp3_plus_plus), 
-                                                        label="Exp3++")
-plt.title("Averaged Regret on the Partial-Information Stochastic Bernoulli Bandit problem (Delta > 0.25)")
-
-plt.legend()
-plt.ylabel('Regret')
-plt.xlabel('Round n')
-plt.savefig('PI High-Gap Stochastic Problem')
-plt.close()
+stochastically_constrained_data_job = Stochastically_Constrained()
+ucb_algorithm = UCB(stochastically_constrained_data_job)
+explore_then_commit_algo = Explore_Then_Commit(stochastically_constrained_data_job)
+exp3 = Exp3(stochastically_constrained_data_job)
+exp3_plus_plus = Exp3_plus_plus(stochastically_constrained_data_job)
+tsallis_inf = Tsallis_Inf(stochastically_constrained_data_job)
+partial_info_ground_2 = Partial_Info_Play_Ground(stochastically_constrained_data_job, 
+                                                 [tsallis_inf, ucb_algorithm, explore_then_commit_algo, exp3, exp3_plus_plus],
+                                                 plot_label = "Stochastically Constrained Partial Info Game")
+partial_info_ground_2.plot_results()

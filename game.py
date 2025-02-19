@@ -8,6 +8,7 @@ class Game:
         self.bandit_algorithm = bandit_algorithm
         self.accumulated_regret = np.zeros(shape=(data_generating_mechanism.get_M(), 
                                                   data_generating_mechanism.get_T()))
+        self.label = self.bandit_algorithm.label
         
     @abstractmethod
     def simulate_one_run(self):

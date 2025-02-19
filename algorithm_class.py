@@ -3,7 +3,7 @@ import numpy as np
 from numpy import random
 
 # Abstract Class for a Full-Information Bandit Algorithm
-class Bandit_Algorithm_FI:
+class Bandit_Algorithm_FI(ABC):
 
     @abstractmethod
     def get_arm_to_pull(self, losses, t):
@@ -20,7 +20,7 @@ class Bandit_Algorithm_FI:
         pass
         
 # Abstract Class for a Partial-Information Bandit Algorithm
-class Bandit_Algorithm_PI:
+class Bandit_Algorithm_PI(ABC):
 
     @abstractmethod
     def get_arm_to_pull(self, importance_weighted_losses, losses, t):

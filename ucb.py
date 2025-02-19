@@ -6,12 +6,29 @@ import math
 class UCB(Bandit_Algorithm_PI):
     def __init__(self, data_generating_mechanism):
         super().__init__()
-        self.data_generating_mechanism = data_generating_mechanism
-        self.label = "UCB"
+        self.__data_generating_mechanism = data_generating_mechanism
+        self.__label = "UCB"
+        self.__current_sampling_distribution = np.zeros(shape = self.data_generating_mechanism.get_K())
+
+    @property
+    def data_generating_mechanism(self):
+        return self.__data_generating_mechanism
+    
+    @property
+    def label(self):
+        return self.__label
+    
+    @property
+    def current_sampling_distribution(self):
+        return self.__current_sampling_distribution
+    
+    @current_sampling_distribution.setter
+    def current_sampling_distribution(self, distr):
+        self.__current_sampling_distribution = distr
 
     def get_arm_to_pull(self, importance_weighted_losses, losses, t):
         # first, explore then ... 
-        if (t <= self.data_generating_mechanism.get_exploration_phase_length()):
+        if (t < self.data_generating_mechanism.get_exploration_phase_length()):
             A_t = math.floor(t / self.data_generating_mechanism.get_init_exploration())
         else:
             arm_estimates_current_round = np.zeros(shape = self.data_generating_mechanism.get_K())

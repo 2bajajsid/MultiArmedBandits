@@ -3,7 +3,7 @@ from numpy import random
 from abc import ABC, abstractmethod
 
 # Abstract Class for a full-information Bandit Algorithm
-class Data_Generating_Mechanism:
+class Data_Generating_Mechanism(ABC):
     def __init__(self, mu_arms, time_horizon, num_runs, init_exploration):
         self.__num_arms = len(mu_arms)
         self.__mu_arms = mu_arms
@@ -24,7 +24,10 @@ class Data_Generating_Mechanism:
         return self.__initial_exploration_per_arm * self.get_K()
     
     def get_init_exploration(self):
-        return self.__init_exploration
+        return self.__initial_exploration_per_arm
+    
+    def get_mu_arm_i(self, i):
+        return self.__mu_arms[i]
 
     @abstractmethod
     def get_rewards(self, t):
