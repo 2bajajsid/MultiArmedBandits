@@ -27,7 +27,7 @@ class Gaussian_Thompson_FI(Bandit_Algorithm_FI):
         if (t < self.exploration_phase_length):
             return math.floor(t / self.init_exploration)
         else:
-            perturbations = random.normal(scale = self.sigma_sq * (self.data_generating_mechanism.get_T() - t), 
+            perturbations = random.normal(scale = math.sqrt(self.sigma_sq * (self.data_generating_mechanism.get_T() - t)), 
                                           size = self.data_generating_mechanism.get_K())
             return np.argmin(np.sum(losses, axis=1) + perturbations)
         
@@ -44,7 +44,7 @@ class Gaussian_Thompson_PI(Bandit_Algorithm_PI):
 
         self.__data_generating_mechanism = data_generating_mechanism
         self.__current_sampling_distribution = np.ones(shape = self.K) / self.K
-        self.__label = "Gaussian Thompson Sampling (K: {:0.2f})".format(self.sigma_sq)
+        self.__label = "Gaussian Thompson Sampling (sigma_sq: {:0.2f})".format(self.sigma_sq)
 
     @property
     def data_generating_mechanism(self):
@@ -71,7 +71,7 @@ class Gaussian_Thompson_PI(Bandit_Algorithm_PI):
             num_counts = np.zeros(shape = self.K)
             
             for n in range(self.num_bootstrap_simulations):
-                perturbations = random.normal(scale = self.sigma_sq * (self.data_generating_mechanism.get_T() - t), 
+                perturbations = random.normal(scale = math.sqrt(self.sigma_sq * (self.data_generating_mechanism.get_T() - t)), 
                                           size = self.data_generating_mechanism.get_K())
                 arm_chosen_this_simulation = np.argmin(np.sum(importance_weighted_losses, axis = 1) + perturbations)
                 num_counts[arm_chosen_this_simulation] = num_counts[arm_chosen_this_simulation] + 1
