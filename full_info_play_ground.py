@@ -9,7 +9,8 @@ class Full_Info_Play_Ground(PlayGround):
             games.append(Full_Information_Game(data_generating_mechanism=data_generating_mechanism, 
                                    bandit_algorithm= bandit_algorithms[i]))
         super().__init__(data_generating_mechanism = data_generating_mechanism, 
-                        games = games)
+                        games = games, 
+                        plot_label=plot_label)
 
 
     

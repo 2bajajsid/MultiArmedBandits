@@ -9,7 +9,16 @@ class Hedge(Bandit_Algorithm_FI):
         self.K = data_generating_mechanism.get_K()
         self.T = data_generating_mechanism.get_T()
         self.neta = math.sqrt((2 * math.log(self.K)) / self.T)
-        self.label = "Hedge"
+        self.__label = "Hedge"
+        self.__data_generating_mechanism = data_generating_mechanism
+
+    @property
+    def data_generating_mechanism(self):
+        return self.__data_generating_mechanism
+    
+    @property
+    def label(self):
+        return self.__label
 
     def get_arm_to_pull(self, losses, t):
         cumulative_losses = np.sum(losses, axis = 1)

@@ -11,8 +11,19 @@ class BaggingFromThePast_FI(Bandit_Algorithm_FI):
         self.exploration_phase_length = data_generating_mechanism.get_exploration_phase_length()
         self.init_exploration = data_generating_mechanism.get_init_exploration()
 
+        self.__data_generating_mechanism = data_generating_mechanism
+        self.__label = "Bagging From The Past"
+
+    @property
+    def data_generating_mechanism(self):
+        return self.__data_generating_mechanism
+    
+    @property
+    def label(self):
+        return self.__label
+
     def get_arm_to_pull(self, losses, t):
-        if (t <= self.exploration_phase_length):
+        if (t < self.exploration_phase_length):
             return math.floor(t / self.init_exploration)
         else:
             uniform_sample = list(random.randint(low = 0, high = t, size = self.T - t))

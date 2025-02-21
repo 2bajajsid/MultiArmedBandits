@@ -3,7 +3,7 @@ from numpy import random
 from algorithm_class import Bandit_Algorithm_PI, Bandit_Algorithm_FI
 import math
 
-class DropOut(Bandit_Algorithm_FI):
+class DropOut_FI(Bandit_Algorithm_FI):
     def __init__(self, data_generating_mechanism, dropout_prob):
         super().__init__()
         self.K = data_generating_mechanism.get_K()
@@ -23,7 +23,7 @@ class DropOut(Bandit_Algorithm_FI):
         return self.__label
 
     def get_arm_to_pull(self, losses, t):
-        if (t <= self.exploration_phase_length):
+        if (t < self.exploration_phase_length):
             return math.floor(t / self.init_exploration)
         else:
             uniform_sample = list(random.choice(t, size = math.floor(t * self.dropout_prob), replace = False))
@@ -31,7 +31,7 @@ class DropOut(Bandit_Algorithm_FI):
             arm_estimates_current_round = np.mean(losses, axis = 1)
             return np.argmin(arm_estimates_current_round)
         
-class DropOut(Bandit_Algorithm_PI):
+class DropOut_PI(Bandit_Algorithm_PI):
     def __init__(self, data_generating_mechanism, dropout_prob):
         super().__init__()
         self.K = data_generating_mechanism.get_K()
