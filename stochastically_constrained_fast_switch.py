@@ -18,7 +18,7 @@ class Stochastically_Constrained_Fast_Switch(Data_Generating_Mechanism):
             rewards[i] = random.binomial(n = 1, p = self.get_mu_arm_i(i))
 
         # switch up rewards if t is in [2^(i - 1), 2^i] if i is odd
-        if (t%4 == 1):
+        if (t%3 == 1):
             temp = rewards[self.optimal_arm_index]
             rewards[self.optimal_arm_index] = rewards[self.worst_arm_index]
             rewards[self.worst_arm_index] = temp

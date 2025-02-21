@@ -12,6 +12,7 @@ from exp_3_plus_plus import Exp3_plus_plus
 from tsallis_inf import Tsallis_Inf
 from bagging_from_the_past import BaggingFromThePast_FI, BaggingFromThePast_PI, BaggingFromThePast_PI_v0, BaggingFromThePast_PI_v1
 from dropout import DropOut_FI, DropOut_PI
+from stochastically_constrained_fast_switch import Stochastically_Constrained_Fast_Switch
 from hedge import Hedge
 from gaussian_thompson_sampling import Gaussian_Thompson_FI, Gaussian_Thompson_PI
 import math
@@ -19,6 +20,7 @@ import numpy as np
 
 high_gap_stochastic_data_job = High_Gap_Stochastic()
 stochastically_constrained_data_job = Stochastically_Constrained()
+stochastically_constrained_fast_switch_data_job = Stochastically_Constrained_Fast_Switch()
 
 hedge = Hedge(stochastically_constrained_data_job)
 bagging_from_the_past_fi = BaggingFromThePast_FI(stochastically_constrained_data_job)
@@ -34,6 +36,14 @@ gaussian_thompson_sampling = Gaussian_Thompson_FI(high_gap_stochastic_data_job, 
 full_info_ground = Full_Info_Play_Ground(high_gap_stochastic_data_job, 
                                          [hedge, gaussian_thompson_sampling, bagging_from_the_past_fi], 
                                          plot_label="Stochastic High Gap Full Info Game")
+full_info_ground.plot_results()
+
+hedge = Hedge(stochastically_constrained_fast_switch_data_job)
+bagging_from_the_past_fi = BaggingFromThePast_FI(stochastically_constrained_fast_switch_data_job)
+gaussian_thompson_sampling = Gaussian_Thompson_FI(stochastically_constrained_fast_switch_data_job, 1)
+full_info_ground = Full_Info_Play_Ground(stochastically_constrained_fast_switch_data_job, 
+                                         [hedge, gaussian_thompson_sampling, bagging_from_the_past_fi], 
+                                         plot_label="Stochastically Constrained Faster Switch Full Info Game")
 full_info_ground.plot_results()
 
 """ bagging_from_the_past = BaggingFromThePast_PI(high_gap_stochastic_data_job)
