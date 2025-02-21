@@ -18,6 +18,7 @@ class Game:
         for i in range(self.data_generating_mechanism.get_M()):
             self.accumulated_regret[i, :] = self.simulate_one_run()
             print('m = {:d}'.format(i))
+        print('Regret of bandit algorithm {} over {:d} runs calculated'.format(self.label, self.data_generating_mechanism.get_M()))
 
     def get_averaged_regret(self):
         return np.mean(self.accumulated_regret, axis=0)
