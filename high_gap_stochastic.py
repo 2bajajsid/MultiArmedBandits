@@ -5,6 +5,7 @@ from data_generating_mechanism import Data_Generating_Mechanism
 class High_Gap_Stochastic(Data_Generating_Mechanism):
         
     def __init__(self):
+        random.seed(0)
         mu_arms = random.uniform(low = 0.25, high = 0.5, size = 10)
         optimal_arm_index = np.argmax(mu_arms)
         mu_arms[optimal_arm_index] = 0.8

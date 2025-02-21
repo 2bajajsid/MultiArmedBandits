@@ -11,7 +11,16 @@ class DropOut(Bandit_Algorithm_FI):
         self.exploration_phase_length = data_generating_mechanism.get_exploration_phase_length()
         self.init_exploration = data_generating_mechanism.get_init_exploration()
         self.dropout_prob = dropout_prob
-        self.label = "Drop Out {prob: 0.2f}".format(prob = self.dropout_prob)
+        self.__label = "Drop Out {prob: 0.2f}".format(prob = self.dropout_prob)
+        self.__data_generating_mechanism = data_generating_mechanism
+
+    @property
+    def data_generating_mechanism(self):
+        return self.__data_generating_mechanism
+    
+    @property
+    def label(self):
+        return self.__label
 
     def get_arm_to_pull(self, losses, t):
         if (t <= self.exploration_phase_length):
@@ -31,6 +40,26 @@ class DropOut(Bandit_Algorithm_PI):
         self.init_exploration = data_generating_mechanism.get_init_exploration()
         self.dropout_prob = dropout_prob
         self.num_bootstrap_simulations = 100
+
+        self.__label = "Drop Out {prob: 0.2f}".format(prob = self.dropout_prob)
+        self.__data_generating_mechanism = data_generating_mechanism
+        self.__current_sampling_distribution = np.ones(shape = self.K) / self.K
+
+    @property
+    def data_generating_mechanism(self):
+        return self.__data_generating_mechanism
+    
+    @property
+    def label(self):
+        return self.__label
+    
+    @property
+    def current_sampling_distribution(self):
+        return self.__current_sampling_distribution
+    
+    @current_sampling_distribution.setter
+    def current_sampling_distribution(self, distr):
+        self.__current_sampling_distribution = distr 
 
     def get_arm_to_pull(self, importance_weighted_losses, losses, t):
         if (t <= self.exploration_phase_length):

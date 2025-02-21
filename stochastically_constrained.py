@@ -5,6 +5,7 @@ from data_generating_mechanism import Data_Generating_Mechanism
 class Stochastically_Constrained(Data_Generating_Mechanism):
 
     def __init__(self):
+        random.seed(0)
         mu_arms = random.uniform(low = 0.25, high = 0.8, size = 10)
         super().__init__(time_horizon = 1000, mu_arms = mu_arms, num_runs = 100, init_exploration = 5)
         self.optimal_arm_index = np.flip(np.argsort(mu_arms))[0]
