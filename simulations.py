@@ -22,14 +22,21 @@ stochastically_constrained_data_job = Stochastically_Constrained()
 
 hedge = Hedge(stochastically_constrained_data_job)
 bagging_from_the_past_fi = BaggingFromThePast_FI(stochastically_constrained_data_job)
-drop_out_fi = DropOut_FI(stochastically_constrained_data_job, dropout_prob=0.05)
-gaussian_thompson_sampling = Gaussian_Thompson_FI(stochastically_constrained_data_job, sigma_sq=stochastically_constrained_data_job.get_K())
+gaussian_thompson_sampling = Gaussian_Thompson_FI(stochastically_constrained_data_job, 1)
 full_info_ground = Full_Info_Play_Ground(stochastically_constrained_data_job, 
-                                         [gaussian_thompson_sampling, hedge, bagging_from_the_past_fi, drop_out_fi], 
+                                         [hedge, gaussian_thompson_sampling, bagging_from_the_past_fi], 
                                          plot_label="Stochastically Constrained Full Info Game")
 full_info_ground.plot_results()
 
-bagging_from_the_past = BaggingFromThePast_PI(high_gap_stochastic_data_job)
+hedge = Hedge(high_gap_stochastic_data_job)
+bagging_from_the_past_fi = BaggingFromThePast_FI(high_gap_stochastic_data_job)
+gaussian_thompson_sampling = Gaussian_Thompson_FI(high_gap_stochastic_data_job, 1)
+full_info_ground = Full_Info_Play_Ground(high_gap_stochastic_data_job, 
+                                         [hedge, gaussian_thompson_sampling, bagging_from_the_past_fi], 
+                                         plot_label="Stochastic High Gap Full Info Game")
+full_info_ground.plot_results()
+
+""" bagging_from_the_past = BaggingFromThePast_PI(high_gap_stochastic_data_job)
 exp3 = Exp3(high_gap_stochastic_data_job)
 exp3_plus_plus = Exp3_plus_plus(high_gap_stochastic_data_job)
 tsallis_inf = Tsallis_Inf(high_gap_stochastic_data_job)
@@ -53,4 +60,4 @@ partial_info_ground_2 = Partial_Info_Play_Ground(stochastically_constrained_data
                                                  [gaussian_thompson_sampling, exp3, drop_out, 
                                                  bagging_from_the_past, tsallis_inf, exp3_plus_plus],
                                                  plot_label = "Stochastically Constrained Partial Info Game")
-partial_info_ground_2.plot_results()
+partial_info_ground_2.plot_results() """
