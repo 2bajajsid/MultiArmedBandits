@@ -12,7 +12,7 @@ class BaggingFromThePast_FI(Bandit_Algorithm_FI):
         self.init_exploration = data_generating_mechanism.get_init_exploration()
 
         self.__data_generating_mechanism = data_generating_mechanism
-        self.__label = "Bagging From The Past"
+        self.__label = "Bootstrapping from Columns"
 
     @property
     def data_generating_mechanism(self):
@@ -42,7 +42,7 @@ class BaggingFromThePast_PI(Bandit_Algorithm_PI):
 
         self.__data_generating_mechanism = data_generating_mechanism
         self.__current_sampling_distribution = np.ones(shape = self.K) / self.K
-        self.__label = "Bagging From The Past"
+        self.__label = "Bootstrapping from Columns"
 
     @property
     def data_generating_mechanism(self):
@@ -97,15 +97,24 @@ class BaggingFromThePast_FI_v0(Bandit_Algorithm_FI):
         self.exploration_phase_length = data_generating_mechanism.get_exploration_phase_length()
         self.init_exploration = data_generating_mechanism.get_init_exploration()
         self.num_bootstrap_simulations = 100
+        self.__label = "Bootstrapping from Individual Losses"
+
+    @property
+    def data_generating_mechanism(self):
+        return self.__data_generating_mechanism
+    
+    @property
+    def label(self):
+        return self.__label
 
     def get_arm_to_pull(self, losses, t):
-        if (t <= self.exploration_phase_length):
+        if (t < self.exploration_phase_length):
             return math.floor(t / self.init_exploration)
         else:
             arm_estimates_current_round = np.zeros(shape = self.K)
 
             for j in range(self.K):
-                uniform_sample = list(random.randint(low = 0, high = t, size = self.K - t))
+                uniform_sample = list(random.randint(low = 0, high = t, size = self.T - t))
                 arm_estimates_current_round[j] = np.mean(losses[j, list(range(t)) + uniform_sample])
         
             return np.argmin(arm_estimates_current_round)
@@ -124,7 +133,7 @@ class BaggingFromThePast_PI_v0(Bandit_Algorithm_PI):
 
         self.__data_generating_mechanism = data_generating_mechanism
         self.__current_sampling_distribution = np.ones(shape = self.K) / self.K
-        self.__label = "Bagging From The Past - v0"
+        self.__label = "Bootstrapping from Individual Losses"
 
     @property
     def data_generating_mechanism(self):
@@ -180,7 +189,7 @@ class BaggingFromThePast_PI_v1(Bandit_Algorithm_PI):
 
         self.__data_generating_mechanism = data_generating_mechanism
         self.__current_sampling_distribution = np.ones(shape = self.K) / self.K
-        self.__label = "Bagging From The Past - v1"
+        self.__label = "Bootstrapping from Columns w/o exploration"
 
     @property
     def data_generating_mechanism(self):
