@@ -4,9 +4,9 @@ from data_generating_mechanism.data_generating_mechanism import Data_Generating_
 
 class Stochastically_Constrained(Data_Generating_Mechanism):
 
-    def __init__(self, num_arms = 50):
+    def __init__(self, num_arms = 25, time_horizon = 2000):
         mu_arms = np.random.uniform(low = 0.25, high = 0.75, size = num_arms)
-        super().__init__(time_horizon = 3000, mu_arms = mu_arms, num_runs = 100, init_exploration = 5)
+        super().__init__(time_horizon = time_horizon, mu_arms = mu_arms, num_runs = 100, init_exploration = 5)
         self.optimal_arm_index = np.flip(np.argsort(mu_arms))[0]
         self.worst_arm_index = np.argsort(mu_arms)[0]
         self.current_exponential = 1

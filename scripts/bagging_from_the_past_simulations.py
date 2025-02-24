@@ -14,10 +14,10 @@ from bandit_algorithms.bagging_from_the_past import BaggingFromThePast_FI, Baggi
 import numpy as np
 import math
 
-high_gap_stochastic_data_job = High_Gap_Stochastic()
-low_gap_stochastic_data_job = Low_Gap_Stochastic()
-stochastically_constrained_data_job = Stochastically_Constrained()
-stochastically_constrained_fast_switch_data_job = Stochastically_Constrained_Fast_Switch()
+high_gap_stochastic_data_job = High_Gap_Stochastic(num_arms = 50, time_horizon = 3000)
+low_gap_stochastic_data_job = Low_Gap_Stochastic(num_arms = 50, time_horizon = 3000)
+stochastically_constrained_data_job = Stochastically_Constrained(num_arms = 50, time_horizon = 3000)
+stochastically_constrained_fast_switch_data_job = Stochastically_Constrained_Fast_Switch(num_arms = 50, time_horizon = 3000)
 
 bp_fi = BaggingFromThePast_FI(stochastically_constrained_data_job)
 bp_fi_v0 = BaggingFromThePast_FI_v0(stochastically_constrained_data_job)
@@ -35,16 +35,16 @@ full_info_ground = Full_Info_Play_Ground(stochastically_constrained_fast_switch_
                                           plot_directory="results/bagging_from_the_past_simulations/")
 full_info_ground.plot_results()
 
-bp_fi = BaggingFromThePast_PI(stochastically_constrained_data_job)
+""" bp_fi = BaggingFromThePast_PI(stochastically_constrained_data_job)
 bp_fi_v0 = BaggingFromThePast_PI_v0(stochastically_constrained_data_job)
 bp_fi_v1 = BaggingFromThePast_PI_v1(stochastically_constrained_data_job)
 partial_info_ground = Partial_Info_Play_Ground(stochastically_constrained_data_job, 
                                          [bp_fi, bp_fi_v0, bp_fi_v1], 
                                           plot_label="Partial Information Stochastic Adversarial (Exponential Switch)",
                                           plot_directory="results/bagging_from_the_past_simulations/")
-partial_info_ground.plot_results()
+partial_info_ground.plot_results() """
 
-bp_fi = BaggingFromThePast_PI(stochastically_constrained_fast_switch_data_job)
+""" bp_fi = BaggingFromThePast_PI(stochastically_constrained_fast_switch_data_job)
 bp_fi_v0 = BaggingFromThePast_PI_v0(stochastically_constrained_fast_switch_data_job)
 bp_fi_v1 = BaggingFromThePast_PI_v1(stochastically_constrained_fast_switch_data_job)
 partial_info_ground = Partial_Info_Play_Ground(stochastically_constrained_fast_switch_data_job, 
@@ -69,4 +69,4 @@ partial_info_ground = Partial_Info_Play_Ground(low_gap_stochastic_data_job,
                                          [bp_fi, bp_fi_v0, bp_fi_v1], 
                                           plot_label="Partial Information Low Gap",
                                           plot_directory="results/bagging_from_the_past_simulations/")
-partial_info_ground.plot_results()
+partial_info_ground.plot_results() """
