@@ -9,7 +9,10 @@ class Low_Gap_Stochastic(Data_Generating_Mechanism):
         optimal_arm_index = np.flip(np.argsort(mu_arms))[0]
         second_optimal_arm_index = np.flip(np.argsort(mu_arms))[1]
         mu_arms[second_optimal_arm_index] = mu_arms[optimal_arm_index] - 0.05
-        super().__init__(time_horizon = time_horizon, mu_arms = mu_arms, num_runs = 100, init_exploration = init_exploration)
+        super().__init__(time_horizon = time_horizon, 
+                         mu_arms = mu_arms, 
+                         num_runs = 100, 
+                         init_exploration = init_exploration)
 
     def get_rewards(self, t):
         rewards = np.zeros(shape = self.get_K())
