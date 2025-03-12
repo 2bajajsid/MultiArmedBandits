@@ -4,14 +4,14 @@ from bandit_algorithms.algorithm_class import Bandit_Algorithm_PI, Bandit_Algori
 import math
 
 class DropOut_FI(Bandit_Algorithm_FI):
-    def __init__(self, data_generating_mechanism, dropout_prob):
+    def __init__(self, data_generating_mechanism, get_dropout_count, dropout_label):
         super().__init__()
         self.K = data_generating_mechanism.get_K()
         self.T = data_generating_mechanism.get_T()
         self.exploration_phase_length = data_generating_mechanism.get_exploration_phase_length()
         self.init_exploration = data_generating_mechanism.get_init_exploration()
-        self.dropout_prob = dropout_prob
-        self.__label = "Drop Out {prob: 0.2f}".format(prob = self.dropout_prob)
+        self.get_dropout_count = get_dropout_count
+        self.__label = "Drop Out with count {}".format(dropout_label)
         self.__data_generating_mechanism = data_generating_mechanism
 
     @property
@@ -27,22 +27,22 @@ class DropOut_FI(Bandit_Algorithm_FI):
             return math.floor(t / self.init_exploration)
         else:
             copied_history = np.copy(losses)
-            uniform_sample = list(random.choice(t, size = math.floor(t * self.dropout_prob), replace=False))
-            copied_history[:, uniform_sample] = np.zeros(shape = (self.K, math.floor(t * self.dropout_prob)))
+            uniform_sample = list(random.choice(t, size = self.get_dropout_count(t), replace=False))
+            copied_history[:, uniform_sample] = 0
             arm_estimates_current_round = np.mean(copied_history, axis = 1)
             return np.argmin(arm_estimates_current_round)
         
 class DropOut_PI(Bandit_Algorithm_PI):
-    def __init__(self, data_generating_mechanism, dropout_prob):
+    def __init__(self, data_generating_mechanism, get_dropout_count, dropout_label):
         super().__init__()
         self.K = data_generating_mechanism.get_K()
         self.T = data_generating_mechanism.get_T()
         self.exploration_phase_length = data_generating_mechanism.get_exploration_phase_length()
         self.init_exploration = data_generating_mechanism.get_init_exploration()
-        self.dropout_prob = dropout_prob
         self.num_bootstrap_simulations = 100
 
-        self.__label = "Drop Out {prob: 0.2f}".format(prob = self.dropout_prob)
+        self.get_dropout_count = get_dropout_count
+        self.__label = "Drop Out with count {}".format(dropout_label)
         self.__data_generating_mechanism = data_generating_mechanism
         self.__current_sampling_distribution = np.ones(shape = self.K) / self.K
 
@@ -70,10 +70,10 @@ class DropOut_PI(Bandit_Algorithm_PI):
 
             for n in range(self.num_bootstrap_simulations):
                 copied_history = np.copy(importance_weighted_losses)
-                uniform_sample = list(random.choice(t, size = math.floor(t * self.dropout_prob), replace=False))
-                copied_history[:, uniform_sample] = np.zeros(shape = (self.K, math.floor(t * self.dropout_prob)))
+                uniform_sample = list(random.choice(t, size = self.get_dropout_count(t), replace=False))
+                copied_history[:, uniform_sample] = 0
 
-                arm_estimates_current_simulation = np.mean(copied_history, axis = 1)
+                arm_estimates_current_simulation = np.sum(copied_history, axis = 1)
                 arm_chosen_this_simulation = np.argmin(arm_estimates_current_simulation)
                 num_counts[arm_chosen_this_simulation] = num_counts[arm_chosen_this_simulation] + 1
                 if (self.num_bootstrap_simulations == n + 1):

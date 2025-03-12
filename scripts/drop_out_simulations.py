@@ -11,83 +11,74 @@ from data_generating_mechanism.stochastically_constrained import Stochastically_
 from data_generating_mechanism.stochastically_constrained_fast_switch import Stochastically_Constrained_Fast_Switch
 from data_generating_mechanism.low_gap_stochastic import Low_Gap_Stochastic
 from bandit_algorithms.dropout import DropOut_FI, DropOut_PI
-from bandit_algorithms.dropout_log import DropOutLog_FI, DropOutLog_PI
 import numpy as np
+import math
 
-high_gap_stochastic_data_job = High_Gap_Stochastic()
-low_gap_stochastic_data_job = Low_Gap_Stochastic()
-stochastically_constrained_data_job = Stochastically_Constrained()
-stochastically_constrained_fast_switch_data_job = Stochastically_Constrained_Fast_Switch()
+NUM_ARMS = 25
+TIME_HORIZON = 2500
+INIT_EXPLORATION = 5
+high_gap_stochastic_data_job = High_Gap_Stochastic(num_arms = NUM_ARMS, 
+                                                   time_horizon = TIME_HORIZON, 
+                                                   init_exploration = INIT_EXPLORATION)
 
-drop_out_point_zero_one = DropOut_FI(stochastically_constrained_data_job, dropout_prob=0.01)
-drop_out_point_zero_five = DropOut_FI(stochastically_constrained_data_job, dropout_prob=0.05)
-drop_out_log_one = DropOutLog_FI(stochastically_constrained_data_job, p=1)
-drop_out_log_point_two = DropOutLog_FI(stochastically_constrained_data_job, p=0.2)
-drop_out_log_point_zero_five = DropOutLog_FI(stochastically_constrained_data_job, p=0.05)
+stochastically_constrained_data_job = Stochastically_Constrained(num_arms = NUM_ARMS, 
+                                                                 time_horizon = TIME_HORIZON, 
+                                                                 init_exploration = INIT_EXPLORATION)
+
+stochastically_constrained_fast_switch_data_job = Stochastically_Constrained_Fast_Switch(num_arms = NUM_ARMS, 
+                                                                                         time_horizon = TIME_HORIZON, 
+                                                                                         init_exploration = INIT_EXPLORATION)
+
+low_gap_stochastic_data_job = Low_Gap_Stochastic(num_arms = NUM_ARMS, 
+                                                 time_horizon = TIME_HORIZON, 
+                                                 init_exploration = INIT_EXPLORATION)
+
+dropout_count_sqrt_t = lambda t : math.floor(math.sqrt(t))
+dropout_count_log_t = lambda t : math.floor(math.log(t))
+dropout_count_point_zero_five = lambda t : math.floor(0.05 * t)
+dropout_count_point_one = lambda t : math.floor(0.1 * t)
+
+dropout_1 = DropOut_FI(stochastically_constrained_data_job, get_dropout_count=dropout_count_sqrt_t, dropout_label="sqrt t")
+dropout_2 = DropOut_FI(stochastically_constrained_data_job, get_dropout_count=dropout_count_log_t, dropout_label= "log t")
+dropout_3 = DropOut_FI(stochastically_constrained_data_job, get_dropout_count=dropout_count_point_zero_five, dropout_label = "0.05 t")
+dropout_4 = DropOut_FI(stochastically_constrained_data_job, get_dropout_count=dropout_count_point_one, dropout_label = "0.1 t")
 full_info_ground = Full_Info_Play_Ground(stochastically_constrained_data_job, 
-                                         [drop_out_point_zero_one, drop_out_point_zero_five, 
-                                          drop_out_log_one, drop_out_log_point_two, drop_out_log_point_zero_five], 
+                                         [dropout_1, dropout_2, dropout_3, dropout_4], 
                                           plot_label="Full Information Stochastic Adversarial (Exponential Switch)",
                                           plot_directory="results/dropout_simulations/")
 full_info_ground.plot_results()
 
-drop_out_point_zero_one = DropOut_FI(stochastically_constrained_fast_switch_data_job, dropout_prob=0.01)
-drop_out_point_zero_five = DropOut_FI(stochastically_constrained_fast_switch_data_job, dropout_prob=0.05)
-drop_out_point_one = DropOut_FI(stochastically_constrained_fast_switch_data_job, dropout_prob=0.1)
-drop_out_log_one = DropOutLog_FI(stochastically_constrained_fast_switch_data_job, p=1)
-drop_out_log_point_two = DropOutLog_FI(stochastically_constrained_fast_switch_data_job, p=0.2)
-drop_out_log_point_zero_five = DropOutLog_FI(stochastically_constrained_fast_switch_data_job, p=0.05)
 full_info_ground = Full_Info_Play_Ground(stochastically_constrained_fast_switch_data_job, 
-                                         [drop_out_point_zero_one, drop_out_point_zero_five,
-                                          drop_out_log_one, drop_out_log_point_two, drop_out_log_point_zero_five], 
+                                         [dropout_1, dropout_2, dropout_3, dropout_4], 
                                           plot_label="Full Information Stochastic Adversarial (Fast Switch)",
                                           plot_directory="results/dropout_simulations/")
 full_info_ground.plot_results()
 
-drop_out_point_zero_one = DropOut_PI(stochastically_constrained_data_job, dropout_prob=0.01)
-drop_out_point_zero_five = DropOut_PI(stochastically_constrained_data_job, dropout_prob=0.05)
-drop_out_log_one = DropOutLog_PI(stochastically_constrained_data_job, p=1)
-drop_out_log_point_two = DropOutLog_PI(stochastically_constrained_data_job, p=0.2)
-drop_out_log_point_zero_five = DropOutLog_PI(stochastically_constrained_data_job, p=0.05)
+dropout_1 = DropOut_PI(stochastically_constrained_data_job, get_dropout_count=dropout_count_sqrt_t, dropout_label="sqrt t")
+dropout_2 = DropOut_PI(stochastically_constrained_data_job, get_dropout_count=dropout_count_log_t, dropout_label= "log t")
+dropout_3 = DropOut_PI(stochastically_constrained_data_job, get_dropout_count=dropout_count_point_zero_five, dropout_label = "0.05 t")
+dropout_4 = DropOut_PI(stochastically_constrained_data_job, get_dropout_count=dropout_count_point_one, dropout_label = "0.1 t")
 partial_info_ground = Partial_Info_Play_Ground(stochastically_constrained_data_job, 
-                                               [drop_out_point_zero_one, drop_out_point_zero_five,  
-                                                drop_out_log_one, drop_out_log_point_two, drop_out_log_point_zero_five], 
+                                               [dropout_1, dropout_2, dropout_3, dropout_4], 
                                                plot_label="Partial Information Stochastic Adversarial (Exponential Switch)",
                                                plot_directory="results/dropout_simulations/")
 partial_info_ground.plot_results()
 
-drop_out_point_zero_one = DropOut_PI(stochastically_constrained_fast_switch_data_job, dropout_prob=0.01)
-drop_out_point_zero_five = DropOut_PI(stochastically_constrained_fast_switch_data_job, dropout_prob=0.05)
-drop_out_log_one = DropOutLog_PI(stochastically_constrained_fast_switch_data_job, p=1)
-drop_out_log_point_two = DropOutLog_PI(stochastically_constrained_fast_switch_data_job, p=0.2)
-drop_out_log_point_zero_five = DropOutLog_PI(stochastically_constrained_fast_switch_data_job, p=0.05)
 partial_info_ground = Partial_Info_Play_Ground(stochastically_constrained_fast_switch_data_job, 
-                                               [drop_out_point_zero_one, drop_out_point_zero_five,  
-                                                drop_out_log_one, drop_out_log_point_two, drop_out_log_point_zero_five], 
+                                               [dropout_1, dropout_2, dropout_3, dropout_4], 
                                                plot_label="Partial Information Stochastic Adversarial (Fast Switch)",
                                                plot_directory="results/dropout_simulations/")
 partial_info_ground.plot_results()
 
-drop_out_point_zero_one = DropOut_PI(high_gap_stochastic_data_job, dropout_prob=0.01)
-drop_out_point_zero_five = DropOut_PI(high_gap_stochastic_data_job, dropout_prob=0.05)
-drop_out_log_one = DropOutLog_PI(high_gap_stochastic_data_job, p=1)
-drop_out_log_point_two = DropOutLog_PI(high_gap_stochastic_data_job, p=0.2)
-drop_out_log_point_zero_five = DropOutLog_PI(high_gap_stochastic_data_job, p=0.05)
+
 partial_info_ground = Partial_Info_Play_Ground(high_gap_stochastic_data_job, 
-                                               [drop_out_point_zero_one, drop_out_point_zero_five,  
-                                                drop_out_log_one, drop_out_log_point_two, drop_out_log_point_zero_five], 
+                                               [dropout_1, dropout_2, dropout_3, dropout_4], 
                                                plot_label="Partial Information High-Gap Stochastic",
                                                plot_directory="results/dropout_simulations/")
 partial_info_ground.plot_results()
 
-drop_out_point_zero_one = DropOut_PI(low_gap_stochastic_data_job, dropout_prob=0.01)
-drop_out_point_zero_five = DropOut_PI(low_gap_stochastic_data_job, dropout_prob=0.05)
-drop_out_log_one = DropOutLog_PI(low_gap_stochastic_data_job, p=1)
-drop_out_log_point_two = DropOutLog_PI(low_gap_stochastic_data_job, p=0.2)
-drop_out_log_point_zero_five = DropOutLog_PI(low_gap_stochastic_data_job, p=0.05)
 partial_info_ground = Partial_Info_Play_Ground(low_gap_stochastic_data_job, 
-                                               [drop_out_point_zero_one, drop_out_point_zero_five,  
-                                                drop_out_log_one, drop_out_log_point_two, drop_out_log_point_zero_five], 
+                                               [dropout_1, dropout_2, dropout_3, dropout_4], 
                                                plot_label="Partial Information Low-Gap Stochastic",
                                                plot_directory="results/dropout_simulations/")
 partial_info_ground.plot_results()
