@@ -63,8 +63,11 @@ class DropOut_PI(Bandit_Algorithm_PI):
         self.__current_sampling_distribution = distr 
 
     def get_arm_to_pull(self, importance_weighted_losses, losses, t):
-        if (t <= self.exploration_phase_length):
-            return math.floor(t / self.init_exploration)
+        if (t < self.exploration_phase_length):
+            A_t = math.floor(t / self.data_generating_mechanism.get_init_exploration())
+            self.current_sampling_distribution = np.zeros(shape = self.data_generating_mechanism.get_K())
+            self.current_sampling_distribution[A_t] = 1
+            return A_t
         else:
             num_counts = np.zeros(shape = self.K)
 

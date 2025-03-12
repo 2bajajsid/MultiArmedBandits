@@ -67,10 +67,17 @@ class Follow_The_Leader_PI(Bandit_Algorithm_PI):
             return A_t
         else:
             arm_estimates = np.sum(importance_weighted_losses, axis = 1)
-            for i in range(self.K):
-                arm_estimates[i] = arm_estimates[i] / len(losses[i])
             A_t = np.argmin(arm_estimates)
             p_t = np.zeros(shape = self.K) 
             p_t[A_t] = 1
+            self.current_sampling_distribution = ((1 - (1 / t)) * p_t) + (1 / (t * self.K))
+            
+            # flip a bernoulli with success 
+            # probability of (1/t) to add an 
+            # explicit exploration component
+            z = np.random.binomial(n = 1, p = (1 / t))
+
+            if (z == 1):
+                A_t = random.randint(low = 0, high = self.K, size = 1)
             
             return A_t
