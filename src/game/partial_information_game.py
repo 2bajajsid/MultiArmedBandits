@@ -3,7 +3,8 @@ from numpy import random
 from game.game import Game
 
 class Partial_Information_Game(Game):
-    def __init__(self, data_generating_mechanism, bandit_algorithm):
+    def __init__(self, data_generating_mechanism, bandit_algorithm, compute_importance_weighted_rewards = False):
+        self.store_importance_weighted_rewards = compute_importance_weighted_rewards
         super().__init__(data_generating_mechanism, bandit_algorithm)
 
     def simulate_one_run(self):
@@ -27,7 +28,7 @@ class Partial_Information_Game(Game):
 
         for t in range(self.data_generating_mechanism.get_T()):
             # estimate arm values 
-            I_t = self.bandit_algorithm.get_arm_to_pull(importance_weighted_history, unweighted_history, t)
+            I_t = self.bandit_algorithm.get_arm_to_pull(importance_weighted_history, unweighted_history, t, self.store_importance_weighted_rewards)
             P_ti[:, t] = self.bandit_algorithm.current_sampling_distribution
 
             # reward is  
@@ -41,7 +42,7 @@ class Partial_Information_Game(Game):
             # to simulate partial info
             for i in range(self.data_generating_mechanism.get_K()): 
                 if (i == I_t):
-                    importance_weighted_history[i][t] = ((1 - r_t[i]) / P_ti[i][t])
+                    importance_weighted_history[i][t] = (r_t[i] / P_ti[i][t]) if self.store_importance_weighted_rewards else ((1 - r_t[i]) / P_ti[i][t])
                     unweighted_history[i].append(1 - r_t[i])
                 else:
                     importance_weighted_history[i][t] = 0

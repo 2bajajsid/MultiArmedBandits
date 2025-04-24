@@ -22,15 +22,15 @@ class DropOut_FI(Bandit_Algorithm_FI):
     def label(self):
         return self.__label
 
-    def get_arm_to_pull(self, losses, t):
+    def get_arm_to_pull(self, losses, t, historyIsRewards = False):
         if (t < self.exploration_phase_length):
             return math.floor(t / self.init_exploration)
         else:
             copied_history = np.copy(losses)
-            uniform_sample = list(random.choice(t, size = self.get_dropout_count(t), replace=False))
+            uniform_sample = list(random.choice(t, size = self.get_dropout_count(t), replace=True))
             copied_history[:, uniform_sample] = 0
             arm_estimates_current_round = np.mean(copied_history, axis = 1)
-            return np.argmin(arm_estimates_current_round)
+            return np.argmax(arm_estimates_current_round) if historyIsRewards else np.argmin(arm_estimates_current_round)
         
 class DropOut_PI(Bandit_Algorithm_PI):
     def __init__(self, data_generating_mechanism, get_dropout_count, dropout_label):
@@ -62,7 +62,7 @@ class DropOut_PI(Bandit_Algorithm_PI):
     def current_sampling_distribution(self, distr):
         self.__current_sampling_distribution = distr 
 
-    def get_arm_to_pull(self, importance_weighted_losses, losses, t):
+    def get_arm_to_pull(self, importance_weighted_history, history, t, historyIsRewards = False):
         if (t < self.exploration_phase_length):
             A_t = math.floor(t / self.data_generating_mechanism.get_init_exploration())
             self.current_sampling_distribution = np.zeros(shape = self.data_generating_mechanism.get_K())
@@ -72,12 +72,12 @@ class DropOut_PI(Bandit_Algorithm_PI):
             num_counts = np.zeros(shape = self.K)
 
             for n in range(self.num_bootstrap_simulations):
-                copied_history = np.copy(importance_weighted_losses)
-                uniform_sample = list(random.choice(t, size = self.get_dropout_count(t), replace=False))
+                copied_history = np.copy(importance_weighted_history)
+                uniform_sample = list(random.choice(t, size = self.get_dropout_count(t), replace=True))
                 copied_history[:, uniform_sample] = 0
 
                 arm_estimates_current_simulation = np.sum(copied_history, axis = 1)
-                arm_chosen_this_simulation = np.argmin(arm_estimates_current_simulation)
+                arm_chosen_this_simulation = np.argmax(arm_estimates_current_simulation) if historyIsRewards else np.argmin(arm_estimates_current_simulation)
                 num_counts[arm_chosen_this_simulation] = num_counts[arm_chosen_this_simulation] + 1
                 if (self.num_bootstrap_simulations == n + 1):
                     A_t = arm_chosen_this_simulation
