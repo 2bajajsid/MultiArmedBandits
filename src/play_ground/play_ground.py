@@ -18,12 +18,12 @@ class PlayGround:
         plt.rcParams["figure.figsize"] = (15,6)
         for i in range(len(self.games)):
             plt.plot(range(self.data_generating_mechanism.get_T()), 
-                        self.games[i].get_averaged_regret(), 
+                        self.games[i].get_instantaneuous_regret(), 
                         label = self.games[i].label)
         
         plt.legend()
         plt.title(self.label)
-        plt.ylabel('Regret')
+        plt.ylabel('Average Instantaneuous Regret')
         plt.xlabel('Round n')
         plt.savefig(self.plot_directory + self.label)
         plt.close()

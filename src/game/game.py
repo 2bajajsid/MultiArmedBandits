@@ -19,6 +19,22 @@ class Game:
             self.accumulated_regret[i, :] = self.simulate_one_run()
             print('m = {:d}'.format(i))
         print('Regret of bandit algorithm {} over {:d} runs calculated'.format(self.label, self.data_generating_mechanism.get_M()))
+        print(np.mean(self.accumulated_regret, axis=0)[self.data_generating_mechanism.get_T() - 1])
 
     def get_averaged_regret(self):
         return np.mean(self.accumulated_regret, axis=0)
+    
+    def get_instantaneuous_regret(self):
+        ave_regret = self.get_averaged_regret()
+        instantaneuous_regret = np.zeros(shape = self.data_generating_mechanism.get_T())
+
+        for i in range(self.data_generating_mechanism.get_T()):
+            if (i == 0):
+                instantaneuous_regret[i] = ave_regret[i]
+            else:
+                instantaneuous_regret[i] = (ave_regret[i] - ave_regret[i-1])
+
+        print("Average Regret of {}".format(self.bandit_algorithm.label))
+        print(ave_regret[self.data_generating_mechanism.get_T() - 1])
+
+        return instantaneuous_regret
