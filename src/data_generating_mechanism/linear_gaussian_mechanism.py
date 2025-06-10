@@ -22,7 +22,7 @@ class Linear_Gaussian_Stochastic(Data_Generating_Mechanism):
 
         super().__init__(time_horizon = time_horizon, 
                          mu_arms = np.zeros(shape = num_arms), 
-                         num_runs = 50, 
+                         num_runs = 1000, 
                          init_exploration = init_exploration)
         
     def initialize_parameters(self):
