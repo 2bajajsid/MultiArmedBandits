@@ -26,9 +26,7 @@ linear_gaussian_ucb_5 = Linear_Gaussian_UCB(linear_gaussian_stochastic_data_job_
 linear_gaussian_ucb_6 = Linear_Gaussian_UCB(linear_gaussian_stochastic_data_job_6)
 
 partial_info_ground = Partial_Info_Play_Ground(linear_gaussian_stochastic_data_job_1, 
-                                                 [linear_gaussian_ucb_1, linear_gaussian_ucb_2, 
-                                                  linear_gaussian_ucb_3, linear_gaussian_ucb_4, 
-                                                  linear_gaussian_ucb_5, linear_gaussian_ucb_6],
+                                                 [linear_gaussian_ucb_2],
                                                  plot_label = "Linear-Gaussian-UCB-10",
                                                  plot_directory = "/Users/sidbajaj/MultiArmedBandits/results/linear_gaussian_ucb_simulations/",
                                                  compute_importance_weighted_rewards = True)
@@ -50,9 +48,7 @@ linear_gaussian_ucb_5 = Linear_Gaussian_UCB(linear_gaussian_stochastic_data_job_
 linear_gaussian_ucb_6 = Linear_Gaussian_UCB(linear_gaussian_stochastic_data_job_6)
 
 partial_info_ground = Partial_Info_Play_Ground(linear_gaussian_stochastic_data_job_1, 
-                                                 [linear_gaussian_ucb_1, linear_gaussian_ucb_2, 
-                                                  linear_gaussian_ucb_3, linear_gaussian_ucb_4, 
-                                                  linear_gaussian_ucb_5, linear_gaussian_ucb_6],
+                                                 [linear_gaussian_ucb_4],
                                                  plot_label = "Linear-Gaussian-UCB-2",
                                                  plot_directory = "/Users/sidbajaj/MultiArmedBandits/results/linear_gaussian_ucb_simulations/",
                                                  compute_importance_weighted_rewards = True)
