@@ -33,7 +33,7 @@ class Partial_Information_Game(Game):
             # nature
             r_t = self.bandit_algorithm.data_generating_mechanism.get_rewards(t)
             if (self.bandit_algorithm.data_generating_mechanism.mustUpdateStatistics):
-                self.bandit_algorithm.data_generating_mechanism.update_statistics(I_t, r_t[I_t])
+                self.bandit_algorithm.data_generating_mechanism.update_statistics(I_t, r_t[I_t], t)
 
             # update the statistics
             # only add non-zero value to the history

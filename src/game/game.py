@@ -24,6 +24,9 @@ class Game:
     def get_averaged_regret(self):
         return np.mean(self.accumulated_regret, axis=0)
     
+    def get_regret_final(self):
+        return self.accumulated_regret[:, self.data_generating_mechanism.get_T() - 1]
+    
     def get_instantaneuous_regret(self):
         ave_regret = self.get_averaged_regret()
         instantaneuous_regret = np.zeros(shape = self.data_generating_mechanism.get_T())
@@ -38,3 +41,4 @@ class Game:
         print(ave_regret[self.data_generating_mechanism.get_T() - 1])
 
         return instantaneuous_regret
+

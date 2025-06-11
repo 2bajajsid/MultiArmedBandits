@@ -1,5 +1,6 @@
 from abc import ABC, abstractmethod
 import matplotlib.pyplot as plt
+import numpy as np
 
 class PlayGround:
     def __init__(self, data_generating_mechanism, games, plot_label, plot_directory):
@@ -27,3 +28,17 @@ class PlayGround:
         plt.xlabel('Round n')
         plt.savefig(self.plot_directory + self.label)
         plt.close()
+
+        self.plot_box_plot()
+
+    def plot_box_plot(self):
+        plt.rcParams["figure.figsize"] = (15,6)
+
+        regret_stats = np.zeros(shape = (self.data_generating_mechanism.get_M(), len(self.games)))
+        for i in range(len(self.games)):
+            regret_stats[:, i] = self.games[i].get_regret_final()
+        
+        fig, ax = plt.subplots()
+        ax.set_ylabel('Regret_T')
+        bplot = ax.boxplot(regret_stats) 
+        plt.show()

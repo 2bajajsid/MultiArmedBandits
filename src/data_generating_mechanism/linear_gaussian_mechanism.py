@@ -22,7 +22,7 @@ class Linear_Gaussian_Stochastic(Data_Generating_Mechanism):
 
         super().__init__(time_horizon = time_horizon, 
                          mu_arms = np.zeros(shape = num_arms), 
-                         num_runs = 1000, 
+                         num_runs = 25, 
                          init_exploration = init_exploration)
         
     def initialize_parameters(self):
@@ -37,7 +37,7 @@ class Linear_Gaussian_Stochastic(Data_Generating_Mechanism):
                                     shape = (self.num_arms, self.d))
         self.mu_arms = self.feature_vectors @ self.theta_star
         
-    def update_statistics(self, arm_index, reward):
+    def update_statistics(self, arm_index, reward, t):
         x = self.get_arm_feature_map(arm_index)
         self.V = self.V + np.outer(x, x)
         self.b = self.b + (reward * x)
