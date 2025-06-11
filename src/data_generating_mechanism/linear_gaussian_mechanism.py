@@ -3,14 +3,14 @@ from numpy import random
 from data_generating_mechanism.data_generating_mechanism import Data_Generating_Mechanism
 
 class Linear_Gaussian_Stochastic(Data_Generating_Mechanism):   
-    def __init__(self, post, d = 10, lambda_reg = 0.25, num_arms = 100, time_horizon = 1000, must_update_statistics = True, init_exploration = 1, delta = 0.01):
+    def __init__(self, d = 10, lambda_reg = 0.25, num_arms = 100, time_horizon = 1000, must_update_statistics = True, init_exploration = 1, conf = 1):
         # the prior mean and the covariance vector
         # will be posteriors at the first time-step
         self.d = d
-        self.delta = delta
+        self.conf = conf
         self.mustUpdateStatistics = True
         self.posterior_mean = np.zeros(d)
-        self.posterior_covariance = post * np.identity(d)
+        self.posterior_covariance = 10 * np.identity(d)
         self.num_arms = num_arms
        
         self.theta_hat = np.zeros(d)
@@ -64,7 +64,7 @@ class Linear_Gaussian_Stochastic(Data_Generating_Mechanism):
     def get_beta(self, t):
         first_part = np.sqrt(self.lambda_reg) * self.get_m2()
         second_part = np.sqrt(2 * np.log(1 / self.delta) + np.log(np.linalg.det(self.V) / self.lambda_reg**self.d))
-        return first_part + second_part
+        return second_part
     
     def compareWith(self, i, t):
         optimal_arm_idx = self.get_optimal_arm_index()
@@ -79,7 +79,7 @@ class Linear_Gaussian_Stochastic(Data_Generating_Mechanism):
     
     def get_arm_index(self, j, t):
         arm_feature = self.get_arm_feature_map(j)
-        return np.dot(self.theta_hat, arm_feature) + self.get_beta(t) * (np.sqrt(arm_feature @ np.linalg.inv(self.V) @ np.transpose(arm_feature)))
+        return np.dot(self.theta_hat, arm_feature) + self.conf * (np.sqrt(arm_feature @ np.linalg.inv(self.V) @ np.transpose(arm_feature)))
 
     def get_rewards(self, t):
         sub_gaussian_error_terms = np.random.normal(size = self.num_arms)

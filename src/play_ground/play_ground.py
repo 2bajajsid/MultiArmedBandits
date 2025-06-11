@@ -41,4 +41,5 @@ class PlayGround:
         fig, ax = plt.subplots()
         ax.set_ylabel('Regret_T')
         bplot = ax.boxplot(regret_stats) 
-        plt.show()
+        plt.savefig(self.plot_directory + self.label + "boxplot")
+        plt.close()
