@@ -70,9 +70,13 @@ class Partial_Information_Game(Game):
     
     def find_minimum(self, starting_values, bounds):
         results = dict()
-        results = minimize(self.simulate_all_runs, method='Nelder-Mead', 
+        '''
+        results = minimize(self.simulate_all_runs, 
+                           method='Nelder-Mead', 
                            x0 = starting_values, 
                            bounds=bounds)
+        '''
+        results = minimize_scalar(self.simulate_all_runs, bounds = (0, 1))
         print(results)
 
     def grid_search(self, grid_values):
