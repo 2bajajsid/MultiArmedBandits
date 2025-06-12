@@ -3,24 +3,22 @@ import matplotlib.pyplot as plt
 import numpy as np
 
 class PlayGround:
-    def __init__(self, data_generating_mechanism, games, plot_label, plot_directory):
-        self.data_generating_mechanism = data_generating_mechanism
+    def __init__(self, games, hyperparameters, plot_label, plot_directory):
         self.games = games
+        self.hyperparameters = hyperparameters
         self.label = plot_label
         self.plot_directory = plot_directory
-
-    def simulate_games(self):
-        for i in range(len(self.games)):
-            self.games[i].compute_averaged_regret()
+        self.horizon = self.games[0].data_generating_mechanism.get_T()
+        self.num_runs = self.games[0].data_generating_mechanism.get_M()
 
     def plot_results(self):
-        self.simulate_games()
-
         plt.rcParams["figure.figsize"] = (15,6)
-        for i in range(len(self.games)):
-            plt.plot(range(self.data_generating_mechanism.get_T()), 
-                        self.games[i].get_instantaneuous_regret(), 
-                        label = self.games[i].label)
+        for i in range(len(self.hyperparameters)):
+            for j in range(len(self.hyperparameters[i])):
+                hyper_parameter_i_j = self.hyperparameters[i][j]
+                plt.plot(range(self.horizon), 
+                            self.games[i].get_instantaneuous_regret(hyper_parameter_i_j), 
+                            label = "{} hyper_parameter {}".format(self.games[i].label, j))
         
         plt.legend()
         plt.title(self.label)
@@ -34,7 +32,7 @@ class PlayGround:
     def plot_box_plot(self):
         plt.rcParams["figure.figsize"] = (15,6)
 
-        regret_stats = np.zeros(shape = (self.data_generating_mechanism.get_M(), len(self.games)))
+        regret_stats = np.zeros(shape = (self.num_runs, len(self.games)))
         for i in range(len(self.games)):
             regret_stats[:, i] = self.games[i].get_regret_final()
         

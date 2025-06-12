@@ -3,8 +3,7 @@ from numpy import random
 from data_generating_mechanism.data_generating_mechanism import Data_Generating_Mechanism
 
 class Linear_Posterior_Sampling_Stochastic(Data_Generating_Mechanism):   
-    def __init__(self, d = 10, posterior_mean = np.zeros(10), posterior_covariance = 10 * np.identity(10),
-                num_arms = 100, time_horizon = 1000, 
+    def __init__(self, d = 10, num_arms = 100, time_horizon = 1000, 
                 must_update_statistics = True, init_exploration = 1, misspecify = False):
         # the prior mean and the covariance vector
         # will be posteriors at the first time-step
@@ -14,27 +13,23 @@ class Linear_Posterior_Sampling_Stochastic(Data_Generating_Mechanism):
         self.data_posterior_covariance =  10 * np.identity(10)
         self.num_arms = num_arms
         self.misspecify = misspecify
-       
-        # state variables to compute posteriors
-        self.posterior_mean = posterior_mean
-        self.posterior_covariance = posterior_covariance
-        self.precision_matrix = np.zeros(shape = (d, d))
-        self.X = np.zeros(shape = (time_horizon, d))
-        self.Y = np.zeros(shape = time_horizon)
+        self.time_horizon = time_horizon
 
-        self.initialize_parameters()
         super().__init__(time_horizon = time_horizon, 
                          mu_arms = np.zeros(shape = num_arms), 
-                         num_runs = 500, 
+                         num_runs = 100, 
                          init_exploration = init_exploration)
         
-    def initialize_parameters(self):
-        if self.misspecify == True:
-            self.theta_star = np.random.standard_cauchy(size = 10)
-        else:
-            self.theta_star = np.random.multivariate_normal(self.data_posterior_mean, 
-                                                            self.data_posterior_covariance, 
-                                                            size = 1)[0]
+    def initialize_parameters(self, hyperparameter):
+        # state variables to compute posteriors
+        self.posterior_mean = hyperparameter[0]
+        self.posterior_covariance = hyperparameter[1]
+        self.precision_matrix = np.zeros(shape = (self.d, self.d))
+        self.X = np.zeros(shape = (self.time_horizon, self.d))
+        self.Y = np.zeros(shape = self.time_horizon)
+        self.theta_star = np.random.multivariate_normal(self.data_posterior_mean, 
+                                                        self.data_posterior_covariance, 
+                                                        size = 1)[0]
          
         # (num_arms x d) matrix
         self.feature_vectors = np.reshape(np.random.uniform(low = -1/np.sqrt(self.d), 

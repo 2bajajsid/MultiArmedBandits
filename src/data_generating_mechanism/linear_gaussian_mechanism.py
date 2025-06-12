@@ -3,33 +3,29 @@ from numpy import random
 from data_generating_mechanism.data_generating_mechanism import Data_Generating_Mechanism
 
 class Linear_Gaussian_Stochastic(Data_Generating_Mechanism):   
-    def __init__(self, d = 10, lambda_reg = 0.25, num_arms = 100, time_horizon = 1000, must_update_statistics = True, init_exploration = 1, conf = 1):
+    def __init__(self, d = 10, num_arms = 100, time_horizon = 1000, must_update_statistics = True, init_exploration = 1):
         # the prior mean and the covariance vector
         # will be posteriors at the first time-step
         self.d = d
-        self.conf = conf
         self.mustUpdateStatistics = True
         self.posterior_mean = np.zeros(d)
         self.posterior_covariance = 10 * np.identity(d)
         self.num_arms = num_arms
-       
-        self.theta_hat = np.zeros(d)
-        self.lambda_reg = lambda_reg
-        self.V = self.lambda_reg * np.identity(d)
-        self.b = np.zeros(d)
-
-        self.initialize_parameters()
 
         super().__init__(time_horizon = time_horizon, 
                          mu_arms = np.zeros(shape = num_arms), 
-                         num_runs = 25, 
+                         num_runs = 100, 
                          init_exploration = init_exploration)
         
-    def initialize_parameters(self):
+    def initialize_parameters(self, hyperparameter):
+        self.lambda_reg = hyperparameter[0]
+        self.delta = hyperparameter[1]
+        self.V = self.lambda_reg * np.identity(10)
+        self.theta_hat = np.zeros(self.d)
+        self.b = np.zeros(self.d)
         self.theta_star = np.random.multivariate_normal(self.posterior_mean, 
                                                          self.posterior_covariance, 
-                                                         size = 1)[0]
-         
+                                                         size = 1)[0] 
         # (num_arms x d) matrix
         self.feature_vectors = np.reshape(np.random.uniform(low = -1/np.sqrt(self.d), 
                                                 high = 1/np.sqrt(self.d), 
@@ -64,22 +60,11 @@ class Linear_Gaussian_Stochastic(Data_Generating_Mechanism):
     def get_beta(self, t):
         first_part = np.sqrt(self.lambda_reg) * self.get_m2()
         second_part = np.sqrt(2 * np.log(1 / self.delta) + np.log(np.linalg.det(self.V) / self.lambda_reg**self.d))
-        return second_part
-    
-    def compareWith(self, i, t):
-        optimal_arm_idx = self.get_optimal_arm_index()
-        chosen_true = self.get_arm_mean(i)
-        chosen_index = self.get_arm_index(i, t)
-        optimal_true = self.get_arm_mean(optimal_arm_idx)
-        optimal_index = self.get_arm_index(optimal_arm_idx, t)
-        print("Chosen - True mean {} Index {}".format(chosen_true, chosen_index))
-        print("Optimal - True mean {} Index {}".format(optimal_true, optimal_index))
-        print("**")
-        return 
+        return first_part + second_part
     
     def get_arm_index(self, j, t):
         arm_feature = self.get_arm_feature_map(j)
-        return np.dot(self.theta_hat, arm_feature) + self.conf * (np.sqrt(arm_feature @ np.linalg.inv(self.V) @ np.transpose(arm_feature)))
+        return np.dot(self.theta_hat, arm_feature) + self.get_beta(t) * (np.sqrt(arm_feature @ np.linalg.inv(self.V) @ np.transpose(arm_feature)))
 
     def get_rewards(self, t):
         sub_gaussian_error_terms = np.random.normal(size = self.num_arms)

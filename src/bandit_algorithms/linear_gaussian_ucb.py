@@ -7,8 +7,7 @@ class Linear_Gaussian_UCB(Bandit_Algorithm_PI):
     def __init__(self, data_generating_mechanism):
         super().__init__()
         self.__data_generating_mechanism = data_generating_mechanism
-        self.__label = "Linear Gaussian UCB (conf {} lambda {})".format(data_generating_mechanism.conf, 
-                                                                         data_generating_mechanism.lambda_reg)
+        self.__label = "Linear Gaussian UCB"
         self.__current_sampling_distribution = np.zeros(shape = self.data_generating_mechanism.get_K())
 
     @property
@@ -27,7 +26,7 @@ class Linear_Gaussian_UCB(Bandit_Algorithm_PI):
     def current_sampling_distribution(self, distr):
         self.__current_sampling_distribution = distr
     
-    def get_arm_to_pull(self, importance_weighted_losses, losses, t, isStoringRewards):
+    def get_arm_to_pull(self, t):
         arm_estimates_current_round = np.zeros(shape = self.data_generating_mechanism.get_K())
         for j in range(self.data_generating_mechanism.get_K()):
             arm_estimates_current_round[j] = self.data_generating_mechanism.get_arm_index(j, t)
