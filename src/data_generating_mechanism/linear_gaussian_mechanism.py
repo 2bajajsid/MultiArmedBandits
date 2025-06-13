@@ -17,15 +17,13 @@ class Linear_Gaussian_Stochastic(Data_Generating_Mechanism):
                          num_runs = 100, 
                          init_exploration = init_exploration)
         
-    def initialize_parameters(self, hyperparameter):
-        self.lambda_reg = hyperparameter[0]
-        self.delta = hyperparameter[1]
+    def initialize_parameters(self, hyperparameters):
+        self.lambda_reg = hyperparameters['lambda']
+        self.delta = hyperparameters['delta']
         self.V = self.lambda_reg * np.identity(10)
         self.theta_hat = np.zeros(self.d)
         self.b = np.zeros(self.d)
-        self.theta_star = np.random.multivariate_normal(self.posterior_mean, 
-                                                         self.posterior_covariance, 
-                                                         size = 1)[0] 
+        self.theta_star = np.random.normal(loc = self.posterior_mean[0], scale = np.sqrt(self.posterior_covariance[0][0]), size = 10)
         # (num_arms x d) matrix
         self.feature_vectors = np.reshape(np.random.uniform(low = -1/np.sqrt(self.d), 
                                                 high = 1/np.sqrt(self.d), 

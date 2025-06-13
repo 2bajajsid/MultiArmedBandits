@@ -16,12 +16,9 @@ import numpy as np
 import math
 np.random.seed(0)
 
-linear_gaussian_stochastic_data_job_1 = Linear_Gaussian_Stochastic()
-linear_gaussian_ucb_1 = Linear_Gaussian_UCB(linear_gaussian_stochastic_data_job_1)
-
+'''
 linear_ps_data_job_1 = Linear_Posterior_Sampling_Stochastic()
 linear_thompson_sampling = Linear_Posterior_Sampling(linear_ps_data_job_1)
-
 
 ucb_algo = Linear_Gaussian_UCB(UCB_Mixture_Mechanism())
 ucb_hyperparameters = [0.05, 0.1, 0.2, 0.3, 0.4, 0.5]
@@ -31,27 +28,22 @@ partial_info_ground = Partial_Info_Play_Ground(bandit_algorithms=[ucb_algo],
                                               plot_directory = "/Users/sidbajaj/MultiArmedBandits/results/linear_gaussian_ucb_simulations/")
 partial_info_ground.plot_results()
 partial_info_ground.games[0].find_minimum([0.3], Bounds([0], [1]))
-
 '''
-gaussian_ucb_values = [[0.01,0.001], 
-               [0.1,0.001], 
-               [0.3,0.001], 
-               [0.5,0.001], 
-               [0.7,0.001], 
-               [1.1,0.001], 
-               [1.5,0.001], 
-               [4,0.001],
-               [10,0.001]]
+
+linear_gaussian_stochastic_data_job_1 = Linear_Gaussian_Stochastic()
+linear_gaussian_ucb_1 = Linear_Gaussian_UCB(linear_gaussian_stochastic_data_job_1)
+gaussian_ucb_values = [{'lambda': 1.0, 'delta': 0.001},
+                       {'lambda': 0.1, 'delta': 0.001}, 
+                       {'lambda': 0.1885, 'delta': 0.0083}]
 
 ts_hyperparameter = [[np.zeros(10), 10 * np.identity(10)]]
 
-partial_info_ground = Partial_Info_Play_Ground(bandit_algorithms=[linear_thompson_sampling, 
-                                                                  linear_gaussian_ucb_1],
-                                              hyperparameters = [ts_hyperparameter ,gaussian_ucb_values],
+partial_info_ground = Partial_Info_Play_Ground(bandit_algorithms=[linear_gaussian_ucb_1],
+                                              hyperparameters = [gaussian_ucb_values],
                                               plot_label = "Linear-Gaussian-UCB",
                                               plot_directory = "/Users/sidbajaj/MultiArmedBandits/results/linear_gaussian_ucb_simulations/")
-partial_info_ground.plot_results()
-'''
+#partial_info_ground.plot_results()
+partial_info_ground.games[0].find_minimum([0.3], Bounds([0], [1]))
 
 '''
 grid_values = [[0.01,0.001], 

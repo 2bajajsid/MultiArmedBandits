@@ -3,15 +3,16 @@ from numpy import random
 from game.game import Game
 import matplotlib.pyplot as plt
 from scipy.optimize import minimize_scalar, Bounds, minimize
+from bayes_opt import BayesianOptimization
 
 class Partial_Information_Game(Game):
     def __init__(self, bandit_algorithm):
         super().__init__(bandit_algorithm)
 
-    def simulate_one_run(self, hyperparameter):
+    def simulate_one_run(self, hyperparameters):
         # initialize the data structures
         # to hold the losses of each arm
-        self.bandit_algorithm.data_generating_mechanism.initialize_parameters(hyperparameter)
+        self.bandit_algorithm.data_generating_mechanism.initialize_parameters(hyperparameters)
         importance_weighted_history = np.zeros(shape = (self.data_generating_mechanism.get_K(), 
                                                         self.data_generating_mechanism.get_T()))
         
@@ -58,15 +59,18 @@ class Partial_Information_Game(Game):
 
         return regret
     
-    def simulate_all_runs(self, hyperparameter):
-        print("Simulating with parameter {}".format(hyperparameter))
+    def simulate_all_runs(self, hyperparameters):
+        print("Simulating with parameter {}".format(hyperparameters))
         num_runs = self.data_generating_mechanism.get_M()
         final_regret = np.zeros(shape = num_runs)
         for i in range(0, num_runs):
-            final_regret[i] = self.simulate_one_run(hyperparameter)[self.data_generating_mechanism.get_T() - 1]
+            final_regret[i] = self.simulate_one_run(hyperparameters)[self.data_generating_mechanism.get_T() - 1]
         ave_regret = np.average(final_regret)
         print(ave_regret)
         return ave_regret
+    
+    def wrapper(self, **hyperparameters):
+        return -1 * self.simulate_all_runs(hyperparameters)
     
     def find_minimum(self, starting_values, bounds):
         results = dict()
@@ -75,9 +79,17 @@ class Partial_Information_Game(Game):
                            method='Nelder-Mead', 
                            x0 = starting_values, 
                            bounds=bounds)
-        '''
         results = minimize_scalar(self.simulate_all_runs, bounds = (0, 1))
-        print(results)
+        '''
+        optimizer = BayesianOptimization(
+            f = self.wrapper,
+            pbounds = {'lambda': (0.0001, 5), 
+                       'delta': (0.0000001, 0.1)},
+            random_state=0,
+            verbose=0
+        )
+        optimizer.maximize(init_points = 2, n_iter = 25)
+        print(optimizer.max)
 
     def grid_search(self, grid_values):
         print(np.shape(grid_values))

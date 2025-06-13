@@ -10,6 +10,8 @@ class UCB_Mixture_Mechanism(Data_Generating_Mechanism):
         self.d = d
         self.low_gap_mean_vector = np.random.uniform(low = 0, high = 0.25, size = self.d)
         self.high_gap_mean_vector = np.random.uniform(low = 0, high = 2.5, size = self.d)
+        self.gamma = 0.3
+        print(self.gamma * self.low_gap_mean_vector + (1 - self.gamma) * self.high_gap_mean_vector)
         super().__init__(time_horizon = time_horizon, 
                          mu_arms = np.zeros(shape = d), 
                          num_runs = 1000, 
@@ -39,7 +41,7 @@ class UCB_Mixture_Mechanism(Data_Generating_Mechanism):
         if (t == 0):
             return np.inf
         else:
-            return self.mean_estimates[j] + (self.confidence_width * np.sqrt(2 * np.log(t) / self.num_times_arm[j]))
+            return self.mean_estimates[j] + (self.confidence_width * np.sqrt(2 * np.log(t + 1) / self.num_times_arm[j]))
 
     def get_rewards(self, t):
         errors = np.random.normal(size = self.d)
