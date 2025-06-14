@@ -9,21 +9,21 @@ class UCB_Mixture_Mechanism(Data_Generating_Mechanism):
         self.mustUpdateStatistics = True
         self.d = d
         self.low_gap_mean_vector = np.random.uniform(low = 0, high = 0.25, size = self.d)
-        self.high_gap_mean_vector = np.random.uniform(low = 0, high = 2.5, size = self.d)
-        self.gamma = 0.3
-        print(self.gamma * self.low_gap_mean_vector + (1 - self.gamma) * self.high_gap_mean_vector)
+        self.high_gap_mean_vector = np.random.uniform(low = 0, high = 5, size = self.d)
+        self.gamma = 0.25
         super().__init__(time_horizon = time_horizon, 
                          mu_arms = np.zeros(shape = d), 
-                         num_runs = 1000, 
+                         num_runs = 100, 
                          init_exploration = 1)
         
-    def initialize_parameters(self, hyperparameter):
+    def initialize_parameters(self, hyperparameters):
         self.mean_estimates = np.zeros(shape = self.d)
-        self.num_times_arm = np.ones(shape = self.d)
-        self.gamma = 0.3
-        self.confidence_width = hyperparameter
-        self.mu_arms = self.gamma * np.random.multivariate_normal(self.low_gap_mean_vector, np.eye(self.d), size = 1)[0] 
-        self.mu_arms += (1 - self.gamma) * np.random.multivariate_normal(self.high_gap_mean_vector, np.eye(self.d), size = 1)[0]
+        self.num_times_arm = np.zeros(shape = self.d)
+        self.mu_arms = np.zeros(shape = self.d)
+        self.delta = hyperparameters['delta']
+        for i in range(self.d):
+            self.mu_arms[i] = self.gamma * np.random.normal(loc = self.low_gap_mean_vector[i], scale = 1, size = 1)
+            self.mu_arms[i] += (1 - self.gamma) * np.random.normal(loc = self.high_gap_mean_vector[i], scale = 1, size = 1)
 
     def get_optimal_arm_mean(self):
         return np.max(self.mu_arms)
@@ -38,10 +38,10 @@ class UCB_Mixture_Mechanism(Data_Generating_Mechanism):
         return 
     
     def get_arm_index(self, j, t):
-        if (t == 0):
+        if t == 0:
             return np.inf
         else:
-            return self.mean_estimates[j] + (self.confidence_width * np.sqrt(2 * np.log(t + 1) / self.num_times_arm[j]))
+            return self.mean_estimates[j] + (np.sqrt(2 * np.log(1/self.delta) / (self.num_times_arm[j] + 1)))
 
     def get_rewards(self, t):
         errors = np.random.normal(size = self.d)

@@ -3,7 +3,7 @@ from numpy import random
 from game.game import Game
 import matplotlib.pyplot as plt
 from scipy.optimize import minimize_scalar, Bounds, minimize
-from bayes_opt import BayesianOptimization
+from bayes_opt import BayesianOptimization, acquisition, SequentialDomainReductionTransformer
 
 class Partial_Information_Game(Game):
     def __init__(self, bandit_algorithm):
@@ -80,15 +80,25 @@ class Partial_Information_Game(Game):
                            x0 = starting_values, 
                            bounds=bounds)
         results = minimize_scalar(self.simulate_all_runs, bounds = (0, 1))
+        minimium_window = {'lambda': 0.25, 'delta': 0.025}
+        pbounds = {'lambda': (0.0001, 5), 'delta': (0.0000001, 0.1)}
+        minimium_window = {'delta': 0.025}
+        pbounds = {'delta': (0.0000001, 0.1)}
+        xi=0.0025
         '''
+        minimium_window = {'delta': 0.025}
+        pbounds = {'delta': (0.0000001, 0.1)}
+        bounds_transformer = SequentialDomainReductionTransformer(minimum_window=minimium_window)
+        xi=0.025
         optimizer = BayesianOptimization(
             f = self.wrapper,
-            pbounds = {'lambda': (0.0001, 5), 
-                       'delta': (0.0000001, 0.1)},
+            pbounds = pbounds,
             random_state=0,
-            verbose=0
+            acquisition_function= acquisition.ProbabilityOfImprovement(xi=xi),
+            verbose=2,
+            bounds_transformer=bounds_transformer
         )
-        optimizer.maximize(init_points = 2, n_iter = 25)
+        optimizer.maximize(init_points = 3, n_iter = 25)
         print(optimizer.max)
 
     def grid_search(self, grid_values):

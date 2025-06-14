@@ -17,7 +17,7 @@ class Game:
     def compute_averaged_regret(self, hyperparameter):
         for i in range(self.data_generating_mechanism.get_M()):
             self.accumulated_regret[i, :] = self.simulate_one_run(hyperparameter)
-            if i % 10 == 0:
+            if i % 100 == 0:
                 print('m = {:d}'.format(i))
         print('Regret of bandit algorithm {} over {:d} runs calculated'.format(self.label, self.data_generating_mechanism.get_M()))
         print(np.mean(self.accumulated_regret, axis=0)[self.data_generating_mechanism.get_T() - 1])
