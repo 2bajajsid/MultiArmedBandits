@@ -86,8 +86,8 @@ class Partial_Information_Game(Game):
         pbounds = {'delta': (0.0000001, 0.1)}
         xi=0.0025
         '''
-        minimium_window = {'conf-width': 0.025}
-        pbounds = {'conf-width': (0, 0.5)}
+        minimium_window = {'alpha': 0.025}
+        pbounds = {'alpha': (0.000001, 5)}
         bounds_transformer = SequentialDomainReductionTransformer(minimum_window=minimium_window)
         xi=0.025
         optimizer = BayesianOptimization(

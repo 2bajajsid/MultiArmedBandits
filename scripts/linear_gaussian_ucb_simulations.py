@@ -10,6 +10,7 @@ from data_generating_mechanism.linear_posterior_sampling_mechanism import Linear
 from data_generating_mechanism.ucb_mixture_mechanism import UCB_Mixture_Mechanism
 from data_generating_mechanism.posterior_sampling_mechanism import Posterior_Sampling_Stochastic
 from data_generating_mechanism.glm_gaussian_mechanism import GLM_Gaussian_Stochastic
+from data_generating_mechanism.glm_posterior_sampling import GLM_Posterior_Stochastic
 from bandit_algorithms.linear_gaussian_ucb import Linear_Gaussian_UCB
 from bandit_algorithms.linear_posterior_sampling import Linear_Posterior_Sampling
 from bandit_algorithms.glm_gaussian_ucb import GLM_Gaussian_UCB
@@ -93,6 +94,7 @@ def logistic_fit_glm(X, y):
 def poisson_fit_glm(X, y):
     return PoissonRegressor(alpha=0, solver='lbfgs',fit_intercept=False, max_iter=500).fit(X, y)
 
+'''
 glm_gaussian_stochastic_data_job_1 = GLM_Gaussian_Stochastic(link=poisson_link_func, 
                                                              fit_glm=poisson_fit_glm,
                                                              reward_gen=poisson_reward_gen,
@@ -113,12 +115,43 @@ glm_poisson_hyperparameters = [{'conf-width': 0.001},
                    {'conf-width': 0.005},
                    {'conf-width': 0.001},
                    {'conf-width': 0.01}]
+'''
+
+glm_logistic_hyperparameters = [
+                   {'alpha': 0.01},
+                   {'alpha': 0.025},
+                   {'alpha': 0.05},
+                   {'alpha': 0.1},
+                   {'alpha': 0.25},
+                   {'alpha': 0.5}
+                   ]
+
+glm_poisson_hyperparameters = [
+                   {'alpha': 0.01},
+                   {'alpha': 0.025},
+                   {'alpha': 0.05},
+                   {'alpha': 0.1},
+                   {'alpha': 0.25},
+                   {'alpha': 0.5}
+                   ]
+
+glm_posterior_stochastic_data_job_1 = GLM_Posterior_Stochastic(link=poisson_link_func, 
+                                                             fit_glm=poisson_fit_glm,
+                                                             reward_gen=poisson_reward_gen,
+                                                             link_prime=poisson_prime_link_func,
+                                                             isLogistic=False)
+
+glm_posterior_stochastic_data_job_2 = GLM_Posterior_Stochastic(link=logistic_link_func, 
+                                                             fit_glm=logistic_fit_glm,
+                                                             link_prime=logistic_prime_link_func,
+                                                             reward_gen=binomial_reward_gen)
+
 np.seterr(all="ignore")
 
-partial_info_ground = Partial_Info_Play_Ground(bandit_algorithms=[GLM_Gaussian_UCB(glm_gaussian_stochastic_data_job_2, label = "Logistic UCB"),
-                                                                  GLM_Gaussian_UCB(glm_gaussian_stochastic_data_job_1, label = "Poisson UCB")],
-                                              hyperparameters=[glm_logistic_hyperparameters,
-                                                               glm_poisson_hyperparameters],
+partial_info_ground = Partial_Info_Play_Ground(bandit_algorithms=[GLM_Gaussian_UCB(glm_posterior_stochastic_data_job_2, label = "Poisson UCB"), 
+                                                                  GLM_Gaussian_UCB(glm_posterior_stochastic_data_job_1, label = "Logistic UCB")],
+                                              hyperparameters=[glm_poisson_hyperparameters,
+                                                               glm_logistic_hyperparameters],
                                               plot_label = "Linear-Gaussian-UCB",
                                               plot_directory = "/Users/sidbajaj/MultiArmedBandits/results/linear_gaussian_ucb_simulations/")
 #partial_info_ground.plot_results()

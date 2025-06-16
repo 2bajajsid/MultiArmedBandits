@@ -19,7 +19,7 @@ class GLM_Gaussian_Stochastic(Data_Generating_Mechanism):
         self.fit_glm = fit_glm
         super().__init__(time_horizon = time_horizon, 
                          mu_arms = np.zeros(shape = num_arms), 
-                         num_runs = 50, 
+                         num_runs = 100, 
                          init_exploration = init_exploration)
         
     def initialize_parameters(self, hyperparameters):
@@ -52,7 +52,7 @@ class GLM_Gaussian_Stochastic(Data_Generating_Mechanism):
                 a_0 = np.random.randint(0, 100, size = 1)
                 r_0 = self.reward_gen(self.mu_arms[a_0])
             
-            self.curr_time_stamp = 2
+            self.curr_time_stamp = 3
             self.r[0] = r_0
             self.m[0, :] = self.get_arm_feature_map(a_0)
             self.M = self.M + np.outer(self.get_arm_feature_map(a_0), self.get_arm_feature_map(a_0))
@@ -77,12 +77,12 @@ class GLM_Gaussian_Stochastic(Data_Generating_Mechanism):
         return sum
         
     def update_statistics(self, arm_index, reward, t):
-        self.curr_time_stamp += 1
         x = self.get_arm_feature_map(arm_index)
         self.r[self.curr_time_stamp] = reward
         self.m[self.curr_time_stamp, :] = x
         self.M = self.M + np.outer(x, x)
         self.theta_hat = self.fit_glm(self.m[:self.curr_time_stamp, :], self.r[:self.curr_time_stamp]).coef_
+        self.curr_time_stamp += 1
         return 
 
     def get_arm_mean(self, j):
