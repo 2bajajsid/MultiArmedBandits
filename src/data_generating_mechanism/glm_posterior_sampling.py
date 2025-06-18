@@ -23,10 +23,11 @@ class GLM_Posterior_Stochastic(Data_Generating_Mechanism):
                          num_runs = 50, 
                          init_exploration = init_exploration)
         
-    def initialize_parameters(self, hyperparameters):
-        self.alpha = hyperparameters['alpha']
-        self.r = np.zeros(shape = self.get_T())
-        self.m = np.zeros(shape = (self.get_T(), self.d))
+    def initialize_parameters(self, alpha):
+        #self.alpha = hyperparameters['alpha']
+        self.alpha = alpha
+        self.r = np.zeros(shape = self.get_T()+5)
+        self.m = np.zeros(shape = (self.get_T()+5, self.d))
         self.M = np.zeros(shape = (self.d, self.d))
         self.curr_time_stamp = 0
         self.theta_star = np.random.normal(loc = self.posterior_mean[0], scale = np.sqrt(self.posterior_covariance[0][0]), size = 10)
@@ -43,8 +44,6 @@ class GLM_Posterior_Stochastic(Data_Generating_Mechanism):
             r_1 = self.reward_gen(self.mu_arms[a_1])
             while (int(r_1) != 1):
                 a_1 = np.random.randint(0, 100, size = 1)
-                print(self.mu_arms[a_1])
-                print("**")
                 r_1 = self.reward_gen(self.mu_arms[a_1])
             
             a_0 = np.random.randint(0, 100, size = 1)
@@ -74,10 +73,13 @@ class GLM_Posterior_Stochastic(Data_Generating_Mechanism):
         self.r[self.curr_time_stamp] = reward
         self.m[self.curr_time_stamp, :] = x
         self.M = self.M + np.outer(x, x)
-        mle = self.fit_glm(self.m[:self.curr_time_stamp+1, :], 
-                           self.r[:self.curr_time_stamp+1]).coef_
-        if (t >= 60):
-            self.theta_hat = np.random.multivariate_normal(mean = mle,
+        if self.isLogistic == True:
+            mle = mle[0]
+        if (t >= 20):
+            mle = self.fit_glm(self.m[:self.curr_time_stamp+1, :], 
+                    self.r[:self.curr_time_stamp+1]).coef_
+            if self.isLogistic == True:
+                self.theta_hat = np.random.multivariate_normal(mean = mle,
                                                         cov = (self.alpha**2) * np.linalg.inv(self.jac(mle)))
         self.curr_time_stamp += 1
         return 

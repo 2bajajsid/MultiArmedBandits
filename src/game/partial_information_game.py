@@ -74,20 +74,19 @@ class Partial_Information_Game(Game):
     
     def find_minimum(self, starting_values, bounds):
         results = dict()
+        results = minimize_scalar(self.simulate_all_runs,  
+                           bounds=(0, 1),
+                           method='bounded')
+
         '''
-        results = minimize(self.simulate_all_runs, 
-                           method='Nelder-Mead', 
-                           x0 = starting_values, 
-                           bounds=bounds)
         results = minimize_scalar(self.simulate_all_runs, bounds = (0, 1))
         minimium_window = {'lambda': 0.25, 'delta': 0.025}
         pbounds = {'lambda': (0.0001, 5), 'delta': (0.0000001, 0.1)}
         minimium_window = {'delta': 0.025}
         pbounds = {'delta': (0.0000001, 0.1)}
         xi=0.0025
-        '''
         minimium_window = {'alpha': 0.025}
-        pbounds = {'alpha': (0.000001, 5)}
+        pbounds = {'alpha': (0.000001, 1)}
         bounds_transformer = SequentialDomainReductionTransformer(minimum_window=minimium_window)
         xi=0.025
         optimizer = BayesianOptimization(
@@ -100,6 +99,7 @@ class Partial_Information_Game(Game):
         )
         optimizer.maximize(init_points = 3, n_iter = 25)
         print(optimizer.max)
+        '''
 
     def grid_search(self, grid_values):
         print(np.shape(grid_values))

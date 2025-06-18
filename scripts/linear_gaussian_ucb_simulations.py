@@ -118,21 +118,19 @@ glm_poisson_hyperparameters = [{'conf-width': 0.001},
 '''
 
 glm_logistic_hyperparameters = [
-                   {'alpha': 0.01},
-                   {'alpha': 0.025},
-                   {'alpha': 0.05},
-                   {'alpha': 0.1},
-                   {'alpha': 0.25},
-                   {'alpha': 0.5}
+                   {'alpha': 2.5},  
+                   {'alpha': 5},
+                   {'alpha': 8},
+                   {'alpha': 10},
+                   {'alpha': 15}
                    ]
 
 glm_poisson_hyperparameters = [
-                   {'alpha': 0.01},
-                   {'alpha': 0.025},
-                   {'alpha': 0.05},
-                   {'alpha': 0.1},
-                   {'alpha': 0.25},
-                   {'alpha': 0.5}
+                   {'alpha': 2.5},  
+                   {'alpha': 5},
+                   {'alpha': 8},
+                   {'alpha': 10},
+                   {'alpha': 15}
                    ]
 
 glm_posterior_stochastic_data_job_1 = GLM_Posterior_Stochastic(link=poisson_link_func, 
@@ -148,8 +146,8 @@ glm_posterior_stochastic_data_job_2 = GLM_Posterior_Stochastic(link=logistic_lin
 
 np.seterr(all="ignore")
 
-partial_info_ground = Partial_Info_Play_Ground(bandit_algorithms=[GLM_Gaussian_UCB(glm_posterior_stochastic_data_job_2, label = "Poisson UCB"), 
-                                                                  GLM_Gaussian_UCB(glm_posterior_stochastic_data_job_1, label = "Logistic UCB")],
+partial_info_ground = Partial_Info_Play_Ground(bandit_algorithms=[GLM_Gaussian_UCB(glm_posterior_stochastic_data_job_1, label = "Poisson UCB"),
+                                                                 GLM_Gaussian_UCB(glm_posterior_stochastic_data_job_2, label = "Logistic UCB")],
                                               hyperparameters=[glm_poisson_hyperparameters,
                                                                glm_logistic_hyperparameters],
                                               plot_label = "Linear-Gaussian-UCB",

@@ -27,7 +27,7 @@ class GLM_Gaussian_UCB(Bandit_Algorithm_PI):
         self.__current_sampling_distribution = distr
     
     def get_arm_to_pull(self, t):
-        if t < 60:
+        if t < 20:
             return int(np.random.uniform(0, 100, size = 1))
         else:
             arm_estimates_current_round = np.zeros(shape = self.data_generating_mechanism.get_K())
