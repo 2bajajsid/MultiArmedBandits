@@ -17,6 +17,7 @@ np.random.seed(0)
 HIGH_GAP = 2.00
 MEDIUM_GAP = 0.5
 LOW_GAP = 0.05
+VERY_LOW_GAP = 0.005
 T = 5000
 
 print("High Gap Experiment")
@@ -54,5 +55,16 @@ partial_info_ground = Partial_Info_Play_Ground(bandit_algorithms=[Linear_Gaussia
                                               hyperparameters=[ucb_hyperparameters],
                                               plot_label = "Linear-Gaussian-UCB",
                                               plot_directory = "/Users/sidbajaj/MultiArmedBandits/results/stat_900_low/",
+                                              gap=LOW_GAP)
+partial_info_ground.plot_results()
+
+print("Very Low Gap Experiment")
+
+# Low Gap 2-armed experiment
+data_job = UCB_Gap_Mechanism(gap = VERY_LOW_GAP, reward_sd=1, time_horizon=T)
+partial_info_ground = Partial_Info_Play_Ground(bandit_algorithms=[Linear_Gaussian_UCB(data_job, "UCB1")],
+                                              hyperparameters=[ucb_hyperparameters],
+                                              plot_label = "Linear-Gaussian-UCB",
+                                              plot_directory = "/Users/sidbajaj/MultiArmedBandits/results/stat_900_vlow/",
                                               gap=LOW_GAP)
 partial_info_ground.plot_results()
