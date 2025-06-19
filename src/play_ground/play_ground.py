@@ -19,7 +19,7 @@ class PlayGround:
                                                 self.games[i].data_generating_mechanism.get_T()))
             med_regret = np.zeros(shape = (len(self.hyperparameters[i]), 
                                                 self.games[i].data_generating_mechanism.get_T()))
-            regret_final = np.zeros(shape = (self.games[i].data_generating_mechanism.get_T(),
+            regret_final = np.zeros(shape = (self.games[i].data_generating_mechanism.get_M(),
                                              len(self.hyperparameters[i])))
             instantaneuous_regret = np.zeros(shape = (len(self.hyperparameters[i]), 
                                                 self.games[i].data_generating_mechanism.get_T()))

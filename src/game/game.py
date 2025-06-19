@@ -17,20 +17,35 @@ class Game:
     def compute_averaged_regret(self, hyperparameter):
         for i in range(self.data_generating_mechanism.get_M()):
             self.accumulated_regret[i, :] = self.simulate_one_run(hyperparameter)
-            #if i % 500 == 0:
-            #    print('m = {:d}'.format(i))
+            if i % 5000 == 0:
+                print('m = {:d}'.format(i))
+            
+        self.compute_regret_sub()    
         print('Average Regret of delta {} over {} runs calculated (median: {} mean: {} std: {})'
               .format(self.data_generating_mechanism.delta, 
-                      self.data_generating_mechanism.get_M(),
-                      np.median(self.accumulated_regret, axis=0)[self.data_generating_mechanism.get_T() - 1],
-                      np.mean(self.accumulated_regret, axis=0)[self.data_generating_mechanism.get_T() - 1], 
-                      np.std(self.get_regret_final()) / np.sqrt(self.data_generating_mechanism.get_M())))
+                      self.data_generating_mechanism.prior_samples,
+                      np.median(self.regret_sub_mean),
+                      np.mean(self.regret_sub_mean), 
+                      np.std(self.regret_sub_mean) / np.sqrt(self.data_generating_mechanism.prior_samples)))
+        
+    def compute_regret_sub(self):
+        self.regret_final = self.get_regret_final()
+        self.regret_sub_mean = np.zeros(self.data_generating_mechanism.prior_samples)
+        self.accumulated_regret_sub = np.zeros(shape=(self.data_generating_mechanism.prior_samples, self.data_generating_mechanism.get_T()))
+        for i in range(self.data_generating_mechanism.prior_samples):
+            start_ind = i*self.data_generating_mechanism.prior_repeats
+            end_ind = (i+1)*self.data_generating_mechanism.prior_repeats - 1
+            self.regret_sub_mean[i] = np.mean(self.regret_final[start_ind:end_ind])
+            self.accumulated_regret_sub[i,:] = np.mean(self.accumulated_regret[start_ind:end_ind,:], axis=0)
+        print("Quantiles (25, 50, 75, 90, 99)")
+        print(np.quantile(self.regret_sub_mean, [0.25, 0.5, 0.75, 0.9, 0.99]))
+
 
     def get_averaged_regret(self):
-        return np.mean(self.accumulated_regret, axis=0)
+        return np.mean(self.accumulated_regret_sub, axis=0)
     
     def get_median_regret(self):
-        return np.median(self.accumulated_regret, axis=0)
+        return np.median(self.accumulated_regret_sub, axis=0)
     
     def get_regret_final(self):
         return self.accumulated_regret[:, self.data_generating_mechanism.get_T() - 1]
