@@ -4,11 +4,11 @@ from bandit_algorithms.algorithm_class import Bandit_Algorithm_PI
 import math
 
 class Linear_Gaussian_UCB(Bandit_Algorithm_PI):
-    def __init__(self, data_generating_mechanism):
+    def __init__(self, data_generating_mechanism, label):
         super().__init__()
         self.__data_generating_mechanism = data_generating_mechanism
-        self.__label = "UCB"
         self.__current_sampling_distribution = np.zeros(shape = self.data_generating_mechanism.get_K())
+        self.__label = label
 
     @property
     def data_generating_mechanism(self):

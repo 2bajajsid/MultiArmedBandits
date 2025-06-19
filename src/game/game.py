@@ -17,13 +17,20 @@ class Game:
     def compute_averaged_regret(self, hyperparameter):
         for i in range(self.data_generating_mechanism.get_M()):
             self.accumulated_regret[i, :] = self.simulate_one_run(hyperparameter)
-            if i % 10 == 0:
-                print('m = {:d}'.format(i))
-        print('Regret of bandit algorithm {} over {:d} runs calculated'.format(self.label, self.data_generating_mechanism.get_M()))
-        print(np.mean(self.accumulated_regret, axis=0)[self.data_generating_mechanism.get_T() - 1])
+            #if i % 500 == 0:
+            #    print('m = {:d}'.format(i))
+        print('Average Regret of delta {} over {} runs calculated (median: {} mean: {} std: {})'
+              .format(self.data_generating_mechanism.delta, 
+                      self.data_generating_mechanism.get_M(),
+                      np.median(self.accumulated_regret, axis=0)[self.data_generating_mechanism.get_T() - 1],
+                      np.mean(self.accumulated_regret, axis=0)[self.data_generating_mechanism.get_T() - 1], 
+                      np.std(self.get_regret_final()) / np.sqrt(self.data_generating_mechanism.get_M())))
 
     def get_averaged_regret(self):
         return np.mean(self.accumulated_regret, axis=0)
+    
+    def get_median_regret(self):
+        return np.median(self.accumulated_regret, axis=0)
     
     def get_regret_final(self):
         return self.accumulated_regret[:, self.data_generating_mechanism.get_T() - 1]
