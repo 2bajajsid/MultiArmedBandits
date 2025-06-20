@@ -64,20 +64,23 @@ class Partial_Information_Game(Game):
         num_runs = self.data_generating_mechanism.get_M()
         final_regret = np.zeros(shape = num_runs)
         for i in range(0, num_runs):
+            if i % 5000 == 0:
+                print('m = {:d}'.format(i))
             final_regret[i] = self.simulate_one_run(hyperparameters)[self.data_generating_mechanism.get_T() - 1]
-        ave_regret = np.average(final_regret)
-        print(ave_regret)
-        return ave_regret
+        self.compute_regret_sub()
+        return self.get_averaged_regret() + (1.96 * np.std(self.regret_sub_mean) / np.sqrt(self.data_generating_mechanism.prior_samples))
     
     def wrapper(self, **hyperparameters):
-        return -1 * self.simulate_all_runs(hyperparameters)
+        self.simulate_all_runs(hyperparameters)
+        self.compute_regret_sub()
+        return -1 * self.get_averaged_regret()
     
-    def find_minimum(self, starting_values, bounds):
+    def find_minimum(self, bounds=(0,1), bracket=(0.0001, 0.01, 0.1)):
         results = dict()
-        results = minimize_scalar(self.simulate_all_runs,  
-                           bounds=(0, 1),
-                           method='bounded')
-
+        results = minimize_scalar(self.compute_averaged_regret,  
+                           bracket=bracket,
+                           method='golden')
+        print(results)
         '''
         results = minimize_scalar(self.simulate_all_runs, bounds = (0, 1))
         minimium_window = {'lambda': 0.25, 'delta': 0.025}

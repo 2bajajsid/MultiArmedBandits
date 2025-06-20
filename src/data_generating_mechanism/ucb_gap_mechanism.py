@@ -3,7 +3,7 @@ from numpy import random
 from data_generating_mechanism.data_generating_mechanism import Data_Generating_Mechanism
 
 class UCB_Gap_Mechanism(Data_Generating_Mechanism):   
-    def __init__(self, gap, reward_sd, time_horizon, prior_samples = 700, prior_repeats = 50, must_update_statistics = True):
+    def __init__(self, gap, reward_sd, time_horizon, prior_samples = 2000, prior_repeats = 30, must_update_statistics = True):
         self.d = 2
         self.mustUpdateStatistics = True
         self.gap = gap
@@ -33,7 +33,8 @@ class UCB_Gap_Mechanism(Data_Generating_Mechanism):
         self.mean_estimates = np.zeros(shape = self.d)
         self.num_times_arm = np.zeros(shape = self.d)
         self.mu_arms = np.zeros(shape = self.d)
-        self.delta = hyperparameters['delta']
+        #self.delta = hyperparameters['delta']
+        self.delta = hyperparameters
         self.mu_arms[0] = self.problems_sampled[self.current_M][0]
         self.mu_arms[1] = self.problems_sampled[self.current_M][1]
         self.current_M += 1

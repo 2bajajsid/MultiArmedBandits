@@ -19,10 +19,10 @@ LOW_GAP = 0.05
 VERY_LOW_GAP = 0.005
 T = 1000
 
-print("High Gap Experiment")
+print("Low Gap Experiment")
 
 # High Gap 2-armed experiment
-data_job = UCB_Gap_Mechanism(gap = HIGH_GAP, reward_sd=1, time_horizon=T)
+data_job = UCB_Gap_Mechanism(gap = LOW_GAP, reward_sd=1, time_horizon=T)
 ucb_hyperparameters = [{'delta': 1/(T**2)}, 
                        {'delta': 1/T},
                        {'delta': 10/T}, 

@@ -15,6 +15,7 @@ class Game:
         pass
 
     def compute_averaged_regret(self, hyperparameter):
+        print("Simulating with parameter {}".format(hyperparameter))
         for i in range(self.data_generating_mechanism.get_M()):
             self.accumulated_regret[i, :] = self.simulate_one_run(hyperparameter)
             if i % 5000 == 0:
@@ -27,6 +28,8 @@ class Game:
                       np.median(self.regret_sub_mean),
                       np.mean(self.regret_sub_mean), 
                       np.std(self.regret_sub_mean) / np.sqrt(self.data_generating_mechanism.prior_samples)))
+        
+        return np.mean(self.regret_sub_mean)
         
     def compute_regret_sub(self):
         self.regret_final = self.get_regret_final()
