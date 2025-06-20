@@ -13,10 +13,10 @@ import numpy as np
 import math
 np.random.seed(0)
 
-HIGH_GAP = 2.00
-MEDIUM_GAP = 0.5
-LOW_GAP = 0.05
-VERY_LOW_GAP = 0.005
+HIGH_GAP = 5.00
+MEDIUM_GAP = 2.5
+LOW_GAP = 0.75
+VERY_LOW_GAP = 0.0025
 T = 1000
 
 print("Medium Gap Experiment")

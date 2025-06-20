@@ -29,7 +29,7 @@ class Game:
                       np.mean(self.regret_sub_mean), 
                       np.std(self.regret_sub_mean) / np.sqrt(self.data_generating_mechanism.prior_samples)))
         
-        return np.mean(self.regret_sub_mean)
+        return np.mean(self.regret_sub_mean) + (1.96 * (np.std(self.regret_sub_mean) / np.sqrt(self.data_generating_mechanism.prior_samples)))
         
     def compute_regret_sub(self):
         self.regret_final = self.get_regret_final()

@@ -75,11 +75,11 @@ class Partial_Information_Game(Game):
         self.compute_regret_sub()
         return -1 * self.get_averaged_regret()
     
-    def find_minimum(self, bounds=(0,1), bracket=(0.0001, 0.01, 0.1)):
+    def find_minimum(self, bounds=(0,1), bracket=(0.0001, 0.01, 0.99)):
         results = dict()
         results = minimize_scalar(self.compute_averaged_regret,  
-                           bracket=bracket,
-                           method='golden')
+                           bounds=(0,1),
+                           method='bounded')
         print(results)
         '''
         results = minimize_scalar(self.simulate_all_runs, bounds = (0, 1))
