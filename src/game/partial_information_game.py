@@ -68,7 +68,8 @@ class Partial_Information_Game(Game):
                 print('m = {:d}'.format(i))
             final_regret[i] = self.simulate_one_run(hyperparameters)[self.data_generating_mechanism.get_T() - 1]
         self.compute_regret_sub()
-        return self.get_averaged_regret() + (1.96 * np.std(self.regret_sub_mean) / np.sqrt(self.data_generating_mechanism.prior_samples))
+        #return self.get_averaged_regret() + (1.96 * np.std(self.regret_sub_mean) / np.sqrt(self.data_generating_mechanism.prior_samples))
+        return self.get_averaged_regret()
     
     def wrapper(self, **hyperparameters):
         self.simulate_all_runs(hyperparameters)

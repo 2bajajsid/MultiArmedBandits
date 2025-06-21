@@ -12,6 +12,21 @@ class PlayGround:
         self.num_runs = self.games[0].data_generating_mechanism.get_M()
         self.gap = gap
 
+    def plot_regret_as_function_of_hyperparameters(self, vlines):
+        regret_final = np.zeros(shape=len(self.hyperparameters[0]))
+        for j in range(len(self.hyperparameters[0])):
+            regret_final[j] = self.games[0].compute_averaged_regret(self.hyperparameters[0][j])
+            self.hyperparameters[0][j] = np.log(1 / self.hyperparameters[0][j]['delta'])
+
+        plt.rcParams["figure.figsize"] = (15,6)
+        plt.ylabel('Average Final Regret')
+        plt.xlabel('ln(1 / delta)')
+        plt.title("Regret as a function of delta")
+        plt.vlines(x=np.log(np.reciprocal(vlines)), ymin=0, ymax=np.max(regret_final), colors='purple', ls='--', lw=2, label='vline_multiple - full height')
+        plt.plot(self.hyperparameters[0], regret_final)
+        plt.savefig(self.plot_directory + self.label + "_Average_Regret_Curve")
+        plt.close()
+
     def plot_results(self):
 
         for i in range(len(self.hyperparameters)):
