@@ -3,33 +3,44 @@ from numpy import random
 from data_generating_mechanism.data_generating_mechanism import Data_Generating_Mechanism
 
 class Linear_Gaussian_Stochastic(Data_Generating_Mechanism):   
-    def __init__(self, d = 10, num_arms = 100, time_horizon = 1000, must_update_statistics = True, init_exploration = 1):
+    def __init__(self, d = 10, true = 5, num_arms = 100, time_horizon = 1000, prior_samples = 200, prior_repeats = 30, must_update_statistics = True, init_exploration = 1):
         # the prior mean and the covariance vector
         # will be posteriors at the first time-step
         self.d = d
         self.mustUpdateStatistics = True
         self.posterior_mean = np.zeros(d)
-        self.posterior_covariance = 10 * np.identity(d)
+        self.true = true
+        self.posterior_covariance = self.true * np.identity(d)
         self.num_arms = num_arms
+        self.time_horizon = time_horizon
+        self.prior_samples = prior_samples
+        self.prior_repeats = prior_repeats
+        self.theta_star_sampled = np.zeros(shape = (self.prior_samples * self.prior_repeats, self.d))
+        self.feature_vectors_sampled = np.zeros(shape = (self.prior_samples * self.prior_repeats, self.num_arms, self.d))
+        self.current_M = (self.prior_repeats * self.prior_samples)
 
         super().__init__(time_horizon = time_horizon, 
                          mu_arms = np.zeros(shape = num_arms), 
-                         num_runs = 100, 
+                         num_runs = prior_samples * prior_repeats, 
                          init_exploration = init_exploration)
         
     def initialize_parameters(self, hyperparameters):
         self.lambda_reg = hyperparameters['lambda']
-        self.delta = hyperparameters['delta']
+        self.delta = 1 / self.time_horizon
         self.V = self.lambda_reg * np.identity(10)
         self.theta_hat = np.zeros(self.d)
         self.b = np.zeros(self.d)
-        self.theta_star = np.random.normal(loc = self.posterior_mean[0], scale = np.sqrt(self.posterior_covariance[0][0]), size = 10)
-        # (num_arms x d) matrix
-        self.feature_vectors = np.reshape(np.random.uniform(low = -1/np.sqrt(self.d), 
-                                                high = 1/np.sqrt(self.d), 
-                                                size = self.num_arms * self.d),
-                                    shape = (self.num_arms, self.d))
-        self.mu_arms = self.feature_vectors @ self.theta_star
+        if (self.current_M == self.prior_repeats * self.prior_samples):
+            self.current_M = 0
+            for i in range(self.prior_samples):
+                self.theta_star_sampled[int(i*self.prior_repeats), :] = np.random.normal(loc = self.posterior_mean[0], scale = np.sqrt(self.posterior_covariance[0][0]), size = 10)
+                self.feature_vectors_sampled[int(i*self.prior_repeats), :, :] = np.reshape(np.random.uniform(low = -1/np.sqrt(self.d), high = 1/np.sqrt(self.d), size = self.num_arms * self.d), shape = (self.num_arms, self.d))
+                for j in range(1, self.prior_repeats):
+                    self.theta_star_sampled[int(i*self.prior_repeats) + j, :] = self.theta_star_sampled[int(i*self.prior_repeats), :]
+                    self.feature_vectors_sampled[int(i*self.prior_repeats) + j, :, :] = self.feature_vectors_sampled[int(i*self.prior_repeats), :]
+        # (num_arms x d) - matrix
+        self.mu_arms = self.feature_vectors_sampled[self.current_M, :, :] @ self.theta_star_sampled[self.current_M, :]
+        self.current_M += 1
         
     def update_statistics(self, arm_index, reward, t):
         x = self.get_arm_feature_map(arm_index)
@@ -40,20 +51,20 @@ class Linear_Gaussian_Stochastic(Data_Generating_Mechanism):
 
     def get_arm_mean(self, j):
         arm_feature = self.get_arm_feature_map(j)
-        return np.dot(self.theta_star, arm_feature)
+        return np.dot(self.theta_star_sampled[self.current_M-1, :], arm_feature)
     
     def get_optimal_arm_mean(self):
         arm_feature = self.get_arm_feature_map(np.argmax(self.mu_arms))
-        return np.dot(self.theta_star, arm_feature)
+        return np.dot(self.theta_star_sampled[self.current_M-1, :], arm_feature)
     
     def get_optimal_arm_index(self):
         return np.argmax(self.mu_arms)
 
     def get_arm_feature_map(self, j):
-        return self.feature_vectors[int(j), :]
+        return self.feature_vectors_sampled[self.current_M-1, int(j), :]
     
     def get_m2(self):
-        return np.sqrt(self.d * 5)
+        return np.linalg.norm(self.theta_star_sampled[self.current_M-1,:])
     
     def get_beta(self, t):
         first_part = np.sqrt(self.lambda_reg) * self.get_m2()

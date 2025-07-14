@@ -5,7 +5,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 from numpy import random
 from play_ground.partial_info_play_ground import Partial_Info_Play_Ground
-from data_generating_mechanism.ucb_gap_mechanism import UCB_Gap_Mechanism
+from data_generating_mechanism.linear_gaussian_mechanism import Linear_Gaussian_Stochastic
 from bandit_algorithms.linear_gaussian_ucb import Linear_Gaussian_UCB
 from game.partial_information_game import Partial_Information_Game
 from scipy.optimize import Bounds
@@ -19,18 +19,19 @@ LOW_GAP = 0.75
 VERY_LOW_GAP = 0.0025
 T = 1000
 
-print("Very Low Gap Experiment")
+print("Linear Gaussian UCB Experiment")
 
 # High Gap 2-armed experiment
-data_job = UCB_Gap_Mechanism(gap = VERY_LOW_GAP, reward_sd=1, time_horizon=T)
-ucb_hyperparameters = [{'delta': 1/(T**2)}, 
-                       {'delta': 1/T},
-                       {'delta': 10/T}, 
-                       {'delta': 100/T},
-                       {'delta': 1000/T}]
-partial_info_ground = Partial_Info_Play_Ground(bandit_algorithms=[Linear_Gaussian_UCB(data_job, "UCB1")],
+data_job = Linear_Gaussian_Stochastic(true = 0.75)
+ucb_hyperparameters = [{'lambda': 0.01}, 
+                       {'lambda': 0.1}, 
+                       {'lambda': 0.5},
+                       {'lambda': 1.0},
+                       {'lambda': 1.5},
+                       {'lambda': 2.5}]
+partial_info_ground = Partial_Info_Play_Ground(bandit_algorithms=[Linear_Gaussian_UCB(data_job, "Linear Gaussian UCB")],
                                               hyperparameters=[ucb_hyperparameters],
-                                              plot_label = "Linear-Gaussian-UCB",
+                                              plot_label = "Low_Posterior",
                                               plot_directory = "/Users/sidbajaj/MultiArmedBandits/results/stat_900_high/",
-                                              gap=VERY_LOW_GAP)
-partial_info_ground.games[0].find_minimum()
+                                              gap=MEDIUM_GAP)
+partial_info_ground.plot_regret_as_function_of_hyperparameters_3(2)

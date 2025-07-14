@@ -79,8 +79,8 @@ class Partial_Information_Game(Game):
     def find_minimum(self, bounds=(0,1), bracket=(0.0001, 0.01, 0.99)):
         results = dict()
         results = minimize_scalar(self.compute_averaged_regret,  
-                           bounds=(0,1),
-                           method='bounded')
+                           bracket=(0.0001,0.109,0.99),
+                           method='golden')
         print(results)
         '''
         results = minimize_scalar(self.simulate_all_runs, bounds = (0, 1))

@@ -26,7 +26,7 @@ print("High Gap Experiment")
 data_job = UCB_Gap_Mechanism(gap = HIGH_GAP, reward_sd=1, time_horizon=T)
 ucb_hyperparameters = [{'delta': 1/(T**2)}, 
                        {'delta': 1/T},
-                       {'delta': 1/np.sqrt(T)}, 
+                       {'delta': 10/T}, 
                        {'delta': 100/T},
                        {'delta': 1000/T}]
 partial_info_ground = Partial_Info_Play_Ground(bandit_algorithms=[Linear_Gaussian_UCB(data_job, "UCB1")],

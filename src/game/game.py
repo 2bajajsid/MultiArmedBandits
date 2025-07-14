@@ -18,8 +18,10 @@ class Game:
         print("Simulating with parameter {}".format(hyperparameter))
         for i in range(self.data_generating_mechanism.get_M()):
             self.accumulated_regret[i, :] = self.simulate_one_run(hyperparameter)
-            if i % 5000 == 0:
+            if i % 1000 == 0:
+                print(hyperparameter)
                 print('m = {:d}'.format(i))
+                print(self.accumulated_regret[i, 999])
             
         self.compute_regret_sub()    
         print('Average Regret of delta {} over {} runs calculated (median: {} mean: {} std: {})'
@@ -29,7 +31,7 @@ class Game:
                       np.mean(self.regret_sub_mean), 
                       np.std(self.regret_sub_mean) / np.sqrt(self.data_generating_mechanism.prior_samples)))
         
-        return np.mean(self.regret_sub_mean) + (1.96 * (np.std(self.regret_sub_mean) / np.sqrt(self.data_generating_mechanism.prior_samples)))
+        return np.mean(self.regret_sub_mean)
         
     def compute_regret_sub(self):
         self.regret_final = self.get_regret_final()
@@ -40,9 +42,15 @@ class Game:
             end_ind = (i+1)*self.data_generating_mechanism.prior_repeats - 1
             self.regret_sub_mean[i] = np.mean(self.regret_final[start_ind:end_ind])
             self.accumulated_regret_sub[i,:] = np.mean(self.accumulated_regret[start_ind:end_ind,:], axis=0)
+        print(self.regret_sub_mean)
         print("Quantiles (25, 50, 75, 90, 99)")
         print(np.quantile(self.regret_sub_mean, [0.25, 0.5, 0.75, 0.9, 0.99]))
 
+    def get_sd_final(self):
+        return 1.96 * (np.std(self.regret_sub_mean) / np.sqrt(self.data_generating_mechanism.prior_samples))
+
+    def get_median_final_regret(self):
+        return np.median(self.regret_sub_mean)
 
     def get_averaged_regret(self):
         return np.mean(self.accumulated_regret_sub, axis=0)

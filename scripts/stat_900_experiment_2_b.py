@@ -13,7 +13,7 @@ import numpy as np
 import math
 np.random.seed(0)
 
-HIGH_GAP = 5.00
+HIGH_GAP = 4.00
 MEDIUM_GAP = 2.5
 LOW_GAP = 0.75
 VERY_LOW_GAP = 0.0025
@@ -22,7 +22,7 @@ T = 1000
 print("Medium Gap Experiment")
 
 # High Gap 2-armed experiment
-data_job = UCB_Gap_Mechanism(gap = MEDIUM_GAP, reward_sd=1, time_horizon=T)
+data_job = UCB_Gap_Mechanism(gap = MEDIUM_GAP, reward_sd=1.5, time_horizon=T)
 ucb_hyperparameters = [{'delta': 1/(T**2)}, 
                        {'delta': 1/T},
                        {'delta': 10/T}, 
@@ -32,5 +32,5 @@ partial_info_ground = Partial_Info_Play_Ground(bandit_algorithms=[Linear_Gaussia
                                               hyperparameters=[ucb_hyperparameters],
                                               plot_label = "Linear-Gaussian-UCB",
                                               plot_directory = "/Users/sidbajaj/MultiArmedBandits/results/stat_900_high/",
-                                              gap=HIGH_GAP)
+                                              gap=MEDIUM_GAP)
 partial_info_ground.games[0].find_minimum()
