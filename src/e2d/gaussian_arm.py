@@ -12,3 +12,6 @@ class Gaussian_Arm(Arm):
     def draw_sample(self):
         return random.normal(loc = self.f_m, 
                              scale = self.f_sd)
+    
+    def get_mean(self):
+        return self.f_m

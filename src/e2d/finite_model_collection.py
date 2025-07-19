@@ -8,3 +8,11 @@ class Finite_Model_Collection(ABC):
     @abstractmethod
     def get_model_class_length(self):
         return
+    
+    @abstractmethod
+    def get_ot(self, action_pi):
+        return
+    
+    @abstractmethod
+    def compute_instantaneous_regret(self, p_t):
+        return
