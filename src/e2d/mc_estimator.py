@@ -51,7 +51,7 @@ class MC_Estimator():
             model_i_action_a = sample_model_i[a, :]
             model_j_acton_a = sample_model_j[a, :]
 
-            lambda_mixture = 1/2
+            lambda_mixture = 0.25
             bootstrap_sample_x = []
             y = np.random.binomial(n = 1, p = lambda_mixture, size = self.m)
             for j in range(self.m):
@@ -73,7 +73,7 @@ class MC_Estimator():
             prediction_prob = clf.predict_proba(bootstrap_sample_x)
             sq_hellinger_hat_mc = np.zeros(shape=self.m)
             for j in range(self.m):
-                sq_hellinger_hat_mc[j] = (np.sqrt(prediction_prob[j][0] / lambda_mixture) - np.sqrt(prediction_prob[j][1] / lambda_mixture))**2
+                sq_hellinger_hat_mc[j] = (np.sqrt(prediction_prob[j][0] / (1 - lambda_mixture)) - np.sqrt(prediction_prob[j][1] / (lambda_mixture)))**2
             sq_hellinger_hat[a] = np.mean(sq_hellinger_hat_mc)
         return sq_hellinger_hat
 
