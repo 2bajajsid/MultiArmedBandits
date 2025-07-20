@@ -12,9 +12,8 @@ model_Class.print_description()
 
 mc_estimator = MC_Estimator(finite_model_class = model_Class)
 
-mc_estimator.draw_samples(m = 25)
+mc_estimator.draw_samples(m = 1000)
 f_m_hat = mc_estimator.get_f_m_hat()
 
-mc_estimator.clear()
-mc_estimator.draw_samples(m = 100)
-f_m_hat = mc_estimator.get_f_m_hat()
+mc_estimator.print_true_squared_hellinger_distance()
+mc_estimator.get_sq_hellinger_divergence_hat()
