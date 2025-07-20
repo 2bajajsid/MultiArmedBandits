@@ -8,7 +8,7 @@ import math
 
 # This is a Meta-Algorithm
 class Meta_Algo():
-    def __init__(self, M, K, T, f_m_hat, hellinger_divergence_map, mc_estimator, alg_est, finite_model_class, num_runs = 1):
+    def __init__(self, M, K, T, mc_estimator, alg_est, finite_model_class, num_runs = 1):
         super().__init__()
         self.M = M # number of models
         self.K = K # number of arms
@@ -42,6 +42,7 @@ class Meta_Algo():
                 self.oracle.add_to_training_dataset(o_t, o_t[action])
 
             self.oracle.clear()
+            self.mc_estimator.clear()
 
     def get_sq_hellinger_map(self, m_hat_index):
         combs = itertools.combinations(range(self.M), 2)

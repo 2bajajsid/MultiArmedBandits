@@ -13,7 +13,3 @@ class Model(ABC):
     @abstractmethod
     def generate_observation(self):
         pass
-
-    @abstractmethod
-    def generate_reward(self, arm_index):
-        pass

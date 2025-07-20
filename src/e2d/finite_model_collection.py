@@ -16,3 +16,11 @@ class Finite_Model_Collection(ABC):
     @abstractmethod
     def compute_instantaneous_regret(self, p_t):
         return
+    
+    @abstractmethod
+    def draw_sample_from_model_index(self):
+        return
+    
+    @abstractmethod
+    def print_description(self):
+        return

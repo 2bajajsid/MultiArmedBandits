@@ -12,7 +12,7 @@ class Gaussian_Model_Collection(Finite_Model_Collection):
         self.models = []
         for i in range(M):
             self.models.append(Gaussian_Model_Class(self.K))
-        self.M_star = np.randint(self.M)
+        self.M_star = np.random.randint(self.M)
         self.pi_star = self.models[self.M_star].get_optimal_arm_index()
     
     def get_model_class_length(self):
@@ -26,3 +26,17 @@ class Gaussian_Model_Collection(Finite_Model_Collection):
     
     def compute_instantaneous_regret(self, p_t):
         return (self.models[self.M_star].arm_means[self.pi_star] - (p_t * self.ot[self.M_star, :]))
+    
+    # draws a (K x m) Monte-Carlo sample 
+    def draw_sample_from_model_index(self, model_index, sample_size):
+        sample_drawn = np.zeros(shape = (self.K, sample_size))
+        for m in range(sample_size):
+            sample_drawn[:, m] = self.models[model_index].generate_observation()
+        return sample_drawn
+    
+    def print_description(self):
+        for i in range(self.M):
+            description = "Model {0} ".format(i)
+            for j in range(self.K):
+                description += "Arm {1} has Mean {2}".format(i, j, self.models[i].arm_means[j]) + "  "
+            print(description)
