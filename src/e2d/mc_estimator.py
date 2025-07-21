@@ -27,18 +27,18 @@ class MC_Estimator():
 
     def get_f_m_hat(self):
         f_m_hat = np.average(self.samples_drawn, axis=2)
-        print("Mean Estimates {} with sample size {}".format(f_m_hat, self.m))
+        #print("Mean Estimates {} with sample size {}".format(f_m_hat, self.m))
         return f_m_hat
 
     def print_true_squared_hellinger_distance(self):
         true_sq_hellinger_divergence = np.zeros(shape = (len(self.combs), self.finite_model_class.K))
       
-        print("True Hellinger Divergence: ")
+        #print("True Hellinger Divergence: ")
         for s in range(len(self.combs)):
             model_i_index = self.combs[s][0]
             model_j_index = self.combs[s][1]
             true_sq_hellinger_divergence[s, :] = self.finite_model_class.compute_true_sq_hellinger_divergence(model_i_index, model_j_index)
-            print("Model {0} Model {1} {2}".format(model_i_index, model_j_index, np.array2string(true_sq_hellinger_divergence[s, :])))
+            #print("Model {0} Model {1} {2}".format(model_i_index, model_j_index, np.array2string(true_sq_hellinger_divergence[s, :])))
 
     def estimate_sq_hellinger_divergence(self, s):
         model_index_i = self.combs[s][0]
@@ -83,8 +83,8 @@ class MC_Estimator():
         for s in range(len(self.combs)):
             self.sq_hellinger_divergence_hat[s, :] = self.estimate_sq_hellinger_divergence(s)
 
-        print("Estimated Hellinger Divergence: ")
+        #print("Estimated Hellinger Divergence: ")
         for s in range(len(self.combs)):
             model_i_index = self.combs[s][0]
             model_j_index = self.combs[s][1]
-            print("Model {0} Model {1} {2}".format(model_i_index, model_j_index, np.array2string(self.sq_hellinger_divergence_hat[s, :])))
+            #print("Model {0} Model {1} {2}".format(model_i_index, model_j_index, np.array2string(self.sq_hellinger_divergence_hat[s, :])))
