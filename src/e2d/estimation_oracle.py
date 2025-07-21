@@ -12,7 +12,7 @@ class Estimation_Oracle(ABC):
         return
     
     @abstractmethod
-    def add_to_training_data_set(self, o_t, r_t):
+    def add_to_training_data_set(self, f_m_hat, r_t):
         return
     
     @abstractmethod

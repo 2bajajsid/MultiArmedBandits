@@ -10,7 +10,7 @@ class Finite_Model_Collection(ABC):
         return
     
     @abstractmethod
-    def get_ot(self, action_pi):
+    def get_rt(self, action_pi):
         return
     
     @abstractmethod

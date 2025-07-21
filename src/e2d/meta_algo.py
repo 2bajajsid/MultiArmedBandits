@@ -41,7 +41,7 @@ class Meta_Algo():
                 for e in range(self.M):
                     p_exp3[np.argmax(self.f_m_hat[e, :])] += exp3_p[e]
                 action = np.random.choice(self.K, p = p_exp3)
-                o_t = self.model_class.get_ot(action)
+                r_t = self.model_class.get_rt(action)
 
                 if (j == 0):
                     # self.accumulated_regret_dec[i][0] = self.finite_model_class.compute_instantaneuous_regret(self.exp3_p)
@@ -49,7 +49,7 @@ class Meta_Algo():
                 else:
                     # self.accumulated_regret_dec[i][j] = self.accumulated_regret[i][j-1] + self.finite_model_class.compute_instantaneous_regret(self.dec_solver.p_hat)
                     self.accumulated_regret_exp[i][j] = self.accumulated_regret_exp[i][j-1] + self.model_class.compute_instantaneous_regret(p_exp3)
-                self.oracle.add_to_training_data_set(o_t)
+                self.oracle.add_to_training_data_set(self.f_m_hat[:, action], r_t)
 
             print("Final Averaged Regret of run {0} : {1}".format(i, self.accumulated_regret_exp[i][j]))
 

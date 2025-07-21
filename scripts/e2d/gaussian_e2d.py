@@ -10,10 +10,10 @@ from e2d.exp_weights_oracle import Exp_Weights_Oracle
 from e2d.meta_algo import Meta_Algo
 
 np.random.seed(900)
-T = 10000 # Time Horizon
-K = 3 # Number of Arms
+T = 500 # Time Horizon
+K = 10 # Number of Arms
 M = 25 # Number of Models
-NUM_RUNS = 2000
+NUM_RUNS = 500
 m = 1000 # Monte-Carlo Sample Size
 
 model_class = Gaussian_Model_Collection(K = K, M = M)

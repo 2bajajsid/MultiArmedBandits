@@ -14,21 +14,15 @@ class Gaussian_Model_Collection(Finite_Model_Collection):
             self.models.append(Gaussian_Model_Class(self.K))
         self.M_star = np.random.randint(self.M)
         self.pi_star = self.models[self.M_star].get_optimal_arm_index()
-        self.t = 0
     
     def get_model_class_length(self):
         return self.M
     
-    def get_ot(self, action_pi):
-        self.o_t = np.zeros(shape = (self.M, self.K))
-        for i in range(self.M):
-            self.o_t[i:, ] = self.models[i].generate_observation()
-        return self.o_t[:, action_pi]
+    def get_rt(self, action_pi):
+        return self.models[self.M_star].generate_observation()[action_pi]
     
     def compute_instantaneous_regret(self, p_t):
-        instant_regret = (self.models[self.M_star].arm_means[self.pi_star] - np.sum(np.multiply(p_t, self.models[self.M_star].arm_means)))
-        self.t += 1
-        return instant_regret
+        return (self.models[self.M_star].arm_means[self.pi_star] - np.sum(np.multiply(p_t, self.models[self.M_star].arm_means)))
     
     # draws a [K x m] Monte-Carlo sample 
     def draw_sample_from_model_index(self, model_index, sample_size):

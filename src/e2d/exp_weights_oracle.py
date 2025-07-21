@@ -14,7 +14,7 @@ class Exp_Weights_Oracle(Estimation_Oracle):
         self.M = M
         self.T = T
         self.accumulated_losses = np.zeros(shape = self.M)
-        self.neta = math.sqrt((2 * math.log(self.M)) / self.T)
+        self.neta = math.sqrt((8 * math.log(self.M)) / self.T)
         self.p = (np.ones(shape = self.M) / self.M)
 
     def get_m_hat_index(self):
@@ -25,9 +25,9 @@ class Exp_Weights_Oracle(Estimation_Oracle):
         self.p = prob_distr / normalization_constant 
         return np.random.choice(self.M, p = self.p)
 
-    def add_to_training_data_set(self, o_t):
+    def add_to_training_data_set(self, f_m_hat, r_t):
         for i in range(self.M):
-            self.accumulated_losses[i] += (np.max(o_t) - o_t[i])
+            self.accumulated_losses[i] += (f_m_hat[i] - r_t)**2
 
     def clear(self):
         self.accumulated_losses = np.zeros(shape = self.M)

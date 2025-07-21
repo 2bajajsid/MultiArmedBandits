@@ -28,8 +28,8 @@ class DEC_Solver():
         for i in range(self.M):
             b[i] = -1 * np.max(self.f_m_hat[i, :])
             A_ub[i][0] = -1 
-            for j in range(self.k):
-                A_ub[i][j + 1] = (-1 * (gamma * self.hell_div_hat[i][j]) - self.f_m_hat[i][j])
+            for j in range(self.K):
+                A_ub[i][j + 1] = (-1 * (gamma * self.hell_div_hat[i][j]) + self.f_m_hat[i][j])
 
         # ensuring that p is in the simplex
         A_eq = np.ones((self.K + 1))
