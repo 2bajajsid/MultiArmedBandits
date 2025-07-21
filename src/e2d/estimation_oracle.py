@@ -16,5 +16,9 @@ class Estimation_Oracle(ABC):
         return
     
     @abstractmethod
+    def current_sampling_distribution(self):
+        return
+    
+    @abstractmethod
     def clear(self):
         return

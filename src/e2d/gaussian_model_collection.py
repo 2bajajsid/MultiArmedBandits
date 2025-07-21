@@ -21,13 +21,14 @@ class Gaussian_Model_Collection(Finite_Model_Collection):
     def get_ot(self, action_pi):
         self.o_t = np.zeros(shape = (self.M, self.K))
         for i in range(self.M):
-            self.ot[i:, ] = self.models[i].generate_observation()
+            self.o_t[i:, ] = self.models[i].generate_observation()
         return self.o_t[:, action_pi]
     
     def compute_instantaneous_regret(self, p_t):
-        return (self.models[self.M_star].arm_means[self.pi_star] - (p_t * self.ot[self.M_star, :]))
+        instant_regret = (self.models[self.M_star].arm_means[self.pi_star] - np.sum(np.multiply(p_t, self.models[self.M_star].arm_means)))
+        return instant_regret
     
-    # draws a (K x m) Monte-Carlo sample 
+    # draws a [K x m] Monte-Carlo sample 
     def draw_sample_from_model_index(self, model_index, sample_size):
         sample_drawn = np.zeros(shape = (self.K, sample_size))
         for m in range(sample_size):

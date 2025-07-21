@@ -9,14 +9,16 @@ class Gaussian_Model_Class(Model):
         super().__init__()
         self.arms = []
         self.K = K
-        self.arms.append(Gaussian_Arm(np.random.normal(loc = Delta, 
+        d = np.random.randint(self.K)
+        for i in range(0, K):
+            if (i == d):
+                self.arms.append(Gaussian_Arm(np.random.normal(loc = Delta, 
                                                        scale = 0.05), 
                                                        scale))
-        for i in range(1, K):
-            self.arms.append(Gaussian_Arm(np.random.normal(loc = 0,
+            else:
+                self.arms.append(Gaussian_Arm(np.random.normal(loc = 0,
                                                            scale = 0.05),
-                                                           scale))
-            
+                                                           scale))   
         self.arm_means = np.zeros(shape = self.K)
         for i in range(K):
             self.arm_means[i] = self.arms[i].get_mean()

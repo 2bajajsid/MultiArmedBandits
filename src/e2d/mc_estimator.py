@@ -28,6 +28,7 @@ class MC_Estimator():
     def get_f_m_hat(self):
         f_m_hat = np.average(self.samples_drawn, axis=2)
         print("Mean Estimates {} with sample size {}".format(f_m_hat, self.m))
+        return f_m_hat
 
     def print_true_squared_hellinger_distance(self):
         true_sq_hellinger_divergence = np.zeros(shape = (len(self.combs), self.finite_model_class.K))
