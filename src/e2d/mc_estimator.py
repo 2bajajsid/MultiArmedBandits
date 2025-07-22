@@ -83,8 +83,9 @@ class MC_Estimator():
         for s in range(len(self.combs)):
             self.sq_hellinger_divergence_hat[s, :] = self.estimate_sq_hellinger_divergence(s)
 
-        #print("Estimated Hellinger Divergence: ")
-        for s in range(len(self.combs)):
-            model_i_index = self.combs[s][0]
-            model_j_index = self.combs[s][1]
-            #print("Model {0} Model {1} {2}".format(model_i_index, model_j_index, np.array2string(self.sq_hellinger_divergence_hat[s, :])))
+        # print("Estimated Hellinger Divergence: ")
+        # for s in range(len(self.combs)):
+        #    model_i_index = self.combs[s][0]
+        #    model_j_index = self.combs[s][1]
+        #       print("Model {0} Model {1} {2}".format(model_i_index, model_j_index, np.array2string(self.sq_hellinger_divergence_hat[s, :])))
+        return self.sq_hellinger_divergence_hat

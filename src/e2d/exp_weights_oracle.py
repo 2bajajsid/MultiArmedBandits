@@ -28,6 +28,7 @@ class Exp_Weights_Oracle(Estimation_Oracle):
     def add_to_training_data_set(self, f_m_hat, r_t):
         for i in range(self.M):
             self.accumulated_losses[i] += (f_m_hat[i] - r_t)**2
+        #print(self.accumulated_losses)
 
     def clear(self):
         self.accumulated_losses = np.zeros(shape = self.M)

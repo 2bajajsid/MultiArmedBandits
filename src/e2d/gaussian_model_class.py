@@ -5,7 +5,7 @@ from e2d.model import Model
 import math
 
 class Gaussian_Model_Class(Model):
-    def __init__(self, K=2, Delta=0.25, scale = 0.5):
+    def __init__(self, Delta, K=2, scale = 0.5):
         super().__init__()
         self.arms = []
         self.K = K

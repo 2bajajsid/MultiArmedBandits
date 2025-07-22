@@ -9,14 +9,14 @@ class DEC_Solver():
     # f_m_hat = [|M| x K]
     # hellinger_divergence_hat = [|M| x  K]
     # m_hat is an int in [|M|]
-    def __init__(self, M, K, f_m_hat):
+    def __init__(self, M, K):
         super().__init__()
         self.M = M
         self.K = K
-        self.f_m_hat = f_m_hat
 
-    def compute_strategy(self, hellinger_divergence_hat, gamma):
+    def compute_strategy(self, f_m_hat, hellinger_divergence_hat, gamma):
         self.hell_div_hat = hellinger_divergence_hat
+        self.f_m_hat = f_m_hat
     
         # s 
         c = np.zeros(shape = self.K + 1)
@@ -29,12 +29,12 @@ class DEC_Solver():
             b[i] = -1 * np.max(self.f_m_hat[i, :])
             A_ub[i][0] = -1 
             for j in range(self.K):
-                A_ub[i][j + 1] = (-1 * (gamma * self.hell_div_hat[i][j]) + self.f_m_hat[i][j])
+                A_ub[i][j + 1] = (-1 * ((gamma * self.hell_div_hat[i][j]) + self.f_m_hat[i][j]))
 
         # ensuring that p is in the simplex
-        A_eq = np.ones((self.K + 1))
-        A_eq[0] = 0
-        b_eq = 1
+        A_eq = np.ones(shape = (1, self.K + 1))
+        A_eq[0][0] = 0
+        b_eq = [1]
 
         # bounds 
         bounds = [(0, None)]
@@ -46,4 +46,4 @@ class DEC_Solver():
         response = res.x
         
         self.DEC_hat = response[0]
-        self.p_hat = response[1:]
+        self.p_hat = np.abs(response[1:])
