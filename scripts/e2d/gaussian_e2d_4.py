@@ -12,20 +12,21 @@ from e2d.exp3_player import Exp3_Player
 from e2d.dec_player import DEC_Player
 
 np.random.seed(900)
-T = 2000 # Time Horizon
+T = 500 # Time Horizon
 K = 10 # Number of Arms
 M = 25 # Number of Models
 NUM_RUNS = 1000
-m = 100 # Monte-Carlo Sample Size
+m = 75 # Monte-Carlo Sample Size
 
-model_class = Gaussian_Model_Collection(K = K, M = M, Optimality_Gap=0.25)
+model_class = Gaussian_Model_Collection(K = K, M = M, Optimality_Gap=1.00)
 mc_estimator = MC_Estimator(finite_model_class = model_class)
 exp3_player = Exp3_Player(M = M, T = T, K = K, numRuns = NUM_RUNS, algEst=Exp_Weights_Oracle(T = T, M = M), label="EXP3: ")
 dec_1_player = DEC_Player(M = M, T = T, K = K, numRuns = NUM_RUNS, algEst=Exp_Weights_Oracle(T = T, M = M), gamma = np.sqrt(T), label="DEC (gamma): sqrt(T)")
 dec_2_player = DEC_Player(M = M, T = T, K = K, numRuns = NUM_RUNS, algEst=Exp_Weights_Oracle(T = T, M = M), gamma = T, label="DEC (gamma): T")
 dec_3_player = DEC_Player(M = M, T = T, K = K, numRuns = NUM_RUNS, algEst=Exp_Weights_Oracle(T = T, M = M), gamma = T**2, label="DEC (gamma): T^2")
+dec_4_player = DEC_Player(M = M, T = T, K = K, numRuns = NUM_RUNS, algEst=Exp_Weights_Oracle(T = T, M = M), gamma = T**4, label="DEC (gamma): T^4")
 meta_algo = Meta_Algo(M = M, K = K, T = T, 
-                      mc_estimator= mc_estimator, players=[exp3_player, dec_1_player, dec_2_player, dec_3_player],
+                      mc_estimator= mc_estimator, players=[exp3_player, dec_1_player, dec_2_player, dec_3_player, dec_4_player],
                       finite_model_class = model_class, num_runs = NUM_RUNS, m = m, 
                       file_name = "Gaussian_Low_Gap_Low_MC",
                       title = "Averaged Regret Over Time [Gaussian Model Class (Low Gap, Low MC)]")
