@@ -14,7 +14,8 @@ class DEC_Solver():
         self.M = M
         self.K = K
 
-    def compute_strategy(self, f_m_hat, hellinger_divergence_hat, gamma):
+    # hellinger_divergence_hat is a M x M x k
+    def compute_strategy(self, f_m_hat, hellinger_divergence_hat, gamma, m_hat_index, p_exp):
         self.hell_div_hat = hellinger_divergence_hat
         self.f_m_hat = f_m_hat
     
@@ -29,7 +30,10 @@ class DEC_Solver():
             b[i] = -1 * np.max(self.f_m_hat[i, :])
             A_ub[i][0] = -1 
             for j in range(self.K):
-                A_ub[i][j + 1] = (-1 * ((gamma * self.hell_div_hat[i][j]) + self.f_m_hat[i][j]))
+                r = 0
+                for m in range(self.M):
+                    r += (p_exp[m] * self.hell_div_hat[m][i][j])
+                A_ub[i][j + 1] = (-1 * ((gamma * r) + self.f_m_hat[i][j]))
 
         # ensuring that p is in the simplex
         A_eq = np.ones(shape = (1, self.K + 1))

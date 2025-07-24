@@ -2,6 +2,7 @@ from abc import ABC, abstractmethod
 import numpy as np
 from numpy import random
 from e2d.estimation_oracle import Estimation_Oracle
+from scipy.special import softmax
 import math
 
 # Estimation Oracle class
@@ -18,16 +19,13 @@ class Exp_Weights_Oracle(Estimation_Oracle):
         self.p = (np.ones(shape = self.M) / self.M)
 
     def get_m_hat_index(self):
-        prob_distr = np.zeros(shape = self.M) 
-        for i in range(self.M):
-            prob_distr[i] = math.exp(-1 * self.neta * self.accumulated_losses[i])
-        normalization_constant = np.sum(prob_distr)
-        self.p = prob_distr / normalization_constant 
+        self.p = softmax(- self.neta * self.accumulated_losses)
         return np.random.choice(self.M, p = self.p)
 
-    def add_to_training_data_set(self, f_m_hat, r_t):
+    def add_to_training_data_set(self, f_m_hat, r_t, p_t):
         for i in range(self.M):
-            self.accumulated_losses[i] += (f_m_hat[i] - r_t)**2
+            p_t = 1
+            self.accumulated_losses[i] += ((f_m_hat[i] - r_t)**2 / p_t)
         #print(self.accumulated_losses)
 
     def clear(self):

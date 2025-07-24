@@ -22,11 +22,12 @@ class Gaussian_Model_Collection(Finite_Model_Collection):
     def get_rt(self, action_pi):
         return self.models[self.M_star].generate_observation()[action_pi]
     
-    def compute_instantaneous_regret(self, p_t):
-        self.t += 1
+    def compute_instantaneous_regret(self, p_t, label, t):
         instantaneuous_regret = (self.models[self.M_star].arm_means[self.pi_star] - np.sum(np.multiply(p_t, self.models[self.M_star].arm_means)))
-        # if (self.t % 1000):
-            #print(instantaneuous_regret)
+        # if (t % 100 == 0 and (label == "DEC (gamma): 2.0")):
+        #    print(p_t)
+        #    print("{0} at time {1}".format(instantaneuous_regret, t))
+        #    print("*****")
         return instantaneuous_regret
     
     # draws a [K x m] Monte-Carlo sample 

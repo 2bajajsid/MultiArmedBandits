@@ -16,3 +16,7 @@ class Player(ABC):
     @abstractmethod
     def plot_averaged_regret(self):
         pass
+
+    @abstractmethod
+    def get_final_averaged_regret(self):
+        pass

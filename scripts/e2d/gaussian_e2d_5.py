@@ -16,7 +16,7 @@ T = 2000 # Time Horizon
 K = 10 # Number of Arms
 M = 25 # Number of Models
 NUM_RUNS = 100
-m = 1000 # Monte-Carlo Sample Size
+m = 100 # Monte-Carlo Sample Size
 
 model_class = Gaussian_Model_Collection(K = K, M = M, Optimality_Gap=1.00)
 mc_estimator = MC_Estimator(finite_model_class = model_class)
@@ -32,6 +32,6 @@ for g in range(len(gamma)):
 meta_algo = Meta_Algo(M = M, K = K, T = T, 
                       mc_estimator= mc_estimator, players=players,
                       finite_model_class = model_class, num_runs = NUM_RUNS, m = m, 
-                      file_name = "Gaussian_Low_Gap_High_MC",
-                      title = "Averaged Regret Over Time [Gaussian Model Class (Low Gap, High MC)]")
+                      file_name = "Gaussian_Low_Gap_Mid_MC",
+                      title = "Averaged Regret Over Time [Gaussian Model Class (Low Gap, Mid MC)]")
 meta_algo.compute_averaged_regret()

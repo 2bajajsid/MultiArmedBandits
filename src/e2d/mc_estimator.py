@@ -52,9 +52,11 @@ class MC_Estimator():
             model_i_action_a = sample_model_i[a, :]
             model_j_acton_a = sample_model_j[a, :]
 
-            lambda_mixture = 0.25
+            lambda_mixture = 0.5
             bootstrap_sample_x = []
             y = np.random.binomial(n = 1, p = lambda_mixture, size = self.m)
+            y[0] = 0
+            y[1] = 1
             for j in range(self.m):
                 if (y[j] == 0):
                     bootstrap_sample_x.append([model_i_action_a[np.random.randint(self.m)]])
