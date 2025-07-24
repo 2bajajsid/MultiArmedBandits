@@ -49,7 +49,7 @@ class Meta_Algo():
             players_regret[p] = self.players[p].get_final_averaged_regret()
 
         sorted_players = np.argsort(players_regret)
-        for i in range(3):
+        for i in range(4):
             self.players[sorted_players[i]].plot_averaged_regret()
 
         plt.legend()
