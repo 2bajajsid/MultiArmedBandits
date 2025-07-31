@@ -21,9 +21,18 @@ class DEC_Player(Player):
 
     def select_action(self, f_m_hat, sq_hellinger_map):
         m_hat_index = self.algEst.get_m_hat_index()
-        self.dec_solver.compute_strategy(f_m_hat, sq_hellinger_map, self.gamma, m_hat_index, self.algEst.current_sampling_distribution())
+
+        sampling_distr = self.algEst.current_sampling_distribution()
+        m_t = np.random.choice(self.M, p = sampling_distr)
+        sampling_distr = np.zeros(shape = self.M)
+        sampling_distr[m_t] = 1
+
+        self.dec_solver.compute_strategy(f_m_hat, sq_hellinger_map, self.gamma, m_hat_index, sampling_distr)
         self.current_p = self.dec_solver.p_hat / np.sum(self.dec_solver.p_hat)
         self.dec = self.dec_solver.DEC_hat
+        if (self.gamma == 0.5):
+            print(self.current_p)
+            print("DEC {} for gamma {}".format(self.dec, self.gamma))
         return np.random.choice(self.K, p = self.current_p)
 
     def update_training_dataset(self, r_t, a_t, f_m_hat, model_class, run, t):
@@ -33,9 +42,12 @@ class DEC_Player(Player):
         else:
             self.accumulated_regret[run][t] = self.accumulated_regret[run][t-1] + model_class.compute_instantaneous_regret(self.current_p, self.label, t)
 
-        if (run % 10 == 0 and t == self.T - 1):
+        if (t == self.T - 1):
+            #print("Clearing")
             self.algEst.clear()
-            print("Regret of Player {0} of run {1} : {2} with DEC Estimate {3}".format(self.label, run, self.accumulated_regret[run][self.T - 1], self.dec))
+            if (run % 10 == 0):
+                print("Regret of Player {0} of run {1} : {2} with DEC Estimate {3}".format(self.label, run, 
+                                                                                           self.accumulated_regret[run][self.T - 1], self.dec))
 
     def plot_averaged_regret(self):
         sd = 1.96 * (np.std(self.accumulated_regret, axis = 0) / np.sqrt(self.numRuns))

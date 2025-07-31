@@ -27,13 +27,14 @@ class Exp3_Player(Player):
     def update_training_dataset(self, r_t, a_t, f_m_hat, model_class, run, t):
         self.algEst.add_to_training_data_set(a_t, r_t, self.current_p[a_t])
         if (t == 0):
-            self.accumulated_regret[run][0] = model_class.compute_instantaneous_regret(self.current_p, self.label, t)
+            self.accumulated_regret[run, 0] = model_class.compute_instantaneous_regret(self.current_p, self.label, t)
         else:
-            self.accumulated_regret[run][t] = self.accumulated_regret[run][t-1] + model_class.compute_instantaneous_regret(self.current_p, self.label, t)
+            self.accumulated_regret[run, t] = self.accumulated_regret[run, t-1] + model_class.compute_instantaneous_regret(self.current_p, self.label, t)
 
-        if (run % 10 == 0 and t == self.T - 1):
+        if (t == self.T - 1):
             self.algEst.clear()
-            print("Final Averaged Regret of Player {0} of run {1} : {2}".format(self.label, run, self.accumulated_regret[run][self.T - 1]))
+            if (run % 10 == 0):
+                print("Final Averaged Regret of Player {0} of run {1} : {2}".format(self.label, run, self.accumulated_regret[run][self.T - 1]))
 
     def plot_averaged_regret(self):
         sd = 1.96 * (np.std(self.accumulated_regret, axis = 0) / np.sqrt(self.numRuns))

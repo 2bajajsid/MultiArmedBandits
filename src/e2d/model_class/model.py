@@ -13,3 +13,7 @@ class Model(ABC):
     @abstractmethod
     def generate_observation(self):
         pass
+
+    def get_delta(self):
+        arms_sorted = np.abs(np.diff(self.arm_means))
+        return np.min(arms_sorted)

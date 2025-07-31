@@ -15,13 +15,13 @@ class Mixed_Model_Collection(Finite_Model_Collection):
         self.models = []
         for i in range(M):
             if (i % 4 == 0):
-                self.models.append(Poisson_Model_Class(K = self.K, Delta = Optimality_Gap))
+                self.models.append(Student_t_Model_Class(K = self.K, Delta = Optimality_Gap))
             elif (i % 4 == 1):
                 self.models.append(Gaussian_Model_Class(K = self.K, Delta = Optimality_Gap))
             elif (i % 4 == 2):
                 self.models.append(Student_t_Model_Class(K = self.K, Delta = Optimality_Gap))
             else:
-                self.models.append(Cauchy_Model_Class(K = self.K, Delta = Optimality_Gap))
+                self.models.append(Gaussian_Model_Class(K = self.K, Delta = Optimality_Gap))
         self.M_star = np.random.randint(self.M)
         self.pi_star = self.models[self.M_star].get_optimal_arm_index()
         self.t = 0

@@ -5,7 +5,7 @@ from numpy import random
 # Abstract class for a finite model collection; 
 # Each model class contains references to a finite number of models
 class Finite_Model_Collection(ABC):
-    
+
     def compute_instantaneous_regret(self, p_t, label, t):
         instantaneuous_regret = (self.models[self.M_star].arm_means[self.pi_star] - np.sum(np.multiply(p_t, self.models[self.M_star].arm_means)))
         # if (t % 100 == 0 and (label == "DEC (gamma): 2.0")):
@@ -20,6 +20,21 @@ class Finite_Model_Collection(ABC):
         for m in range(sample_size):
             sample_drawn[:, m] = self.models[model_index].generate_observation()
         return sample_drawn
+    
+    def get_delta_min(self):
+        delta_min = np.inf
+        for i in range(len(self.models)):
+            delta_min = np.min([delta_min, self.models[i].get_delta()])
+        return delta_min
+
+    def get_delta_delta_min(self):
+        delta_min_min = np.inf
+        for i in range(1, len(self.models)):
+            arm_means_i_minus_1 = self.models[i-1].arm_means 
+            arm_means_i = self.models[i].arm_means
+            arm_means_diff = np.min(np.abs(arm_means_i_minus_1 - arm_means_i))
+            delta_min_min = np.min([arm_means_diff, delta_min_min])
+        return delta_min_min
     
     # [1 x K] squared hellinger divergence matrix
     def compute_true_sq_hellinger_divergence(self, model_index_i, model_index_j):

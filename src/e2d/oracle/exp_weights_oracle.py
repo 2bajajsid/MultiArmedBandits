@@ -10,16 +10,18 @@ import math
 # a weighting algorithm and returns the index of 
 # the expert that has been most accurate so far
 class Exp_Weights_Oracle(Estimation_Oracle):
-    def __init__(self, T, M, K, model_class):
+    def __init__(self, T, M, K):
         super().__init__()
         self.M = M
         self.T = T
         self.K = K
-        self.model_class = model_class
         self.accumulated_losses = np.zeros(shape = self.M)
         self.neta = math.sqrt((8 * math.log(self.M)) / self.T)
         self.p = (np.ones(shape = self.M) / self.M)
         self.f_m_hat = np.zeros(shape = (self.M, self.K))
+
+    def set_model_class(self, model_class):
+        self.model_class = model_class
         for i in range(self.M):
             self.f_m_hat[i, :] = self.model_class.models[i].arm_means
 
