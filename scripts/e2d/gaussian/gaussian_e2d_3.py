@@ -20,8 +20,8 @@ NUM_RUNS = 100
 OPTIMALITY_GAP = 0.05
 DELTA = 0.005
 
-GAP_STRING = "Very_High"
-MC_STRING = "High_Hoeff"
+GAP_STRING = "Low"
+MC_STRING = "Mid_Sq"
 
 meta_algo = Meta_Algo(M = M, K = K, T = T, num_runs = NUM_RUNS,
                       optimality_gap=OPTIMALITY_GAP, delta=DELTA,

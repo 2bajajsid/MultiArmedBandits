@@ -1,0 +1,8 @@
+# Type for Sample Size Calculations:
+HOEFFDING_SAMPLE_SIZE = 0
+CHEBYSHEV_SAMPLE_SIZE = 1
+ASYMPTOTIC_SAMPLE_SIZE = 2
+
+# Type for Estimating Divergence 
+MEAN_SQUARE = 0
+HELLINGER_SQUARE = 1 

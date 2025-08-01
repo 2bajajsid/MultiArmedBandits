@@ -36,22 +36,6 @@ class Finite_Model_Collection(ABC):
             delta_min_min = np.min([arm_means_diff, delta_min_min])
         return delta_min_min
     
-    # [1 x K] squared hellinger divergence matrix
-    def compute_true_sq_hellinger_divergence(self, model_index_i, model_index_j):
-        model_i_mean = self.models[model_index_i].arm_means
-        model_i_sd = 0.5 * np.ones(shape = self.K)
-
-        model_j_mean = self.models[model_index_j].arm_means
-        model_j_sd = 0.5 * np.ones(shape = self.K)
-
-        true_hellinger_dist = np.zeros(shape = self.K)
-        for a in range(self.K):
-            mu_1_minus_mu_2 = (model_i_mean[a] - model_j_mean[a])**2
-            denom = (model_i_sd[a]**2) + (model_j_sd[a]**2)
-            true_hellinger_dist[a] = 1 - (np.sqrt((2 * model_i_sd[a] * model_j_sd[a]) / denom) * np.exp(-0.25 * mu_1_minus_mu_2/denom))
-
-        return true_hellinger_dist
-    
     def print_description(self):
         for i in range(self.M):
             description = "Model {0} ".format(i)

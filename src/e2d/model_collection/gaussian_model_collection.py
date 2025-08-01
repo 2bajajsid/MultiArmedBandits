@@ -16,4 +16,25 @@ class Gaussian_Model_Collection(Finite_Model_Collection):
         self.M_star = np.random.randint(self.M)
         self.pi_star = self.models[self.M_star].get_optimal_arm_index()
         self.t = 0
+
+    def compute_true_sq_hellinger_divergence(self, model_index_i, model_index_j):
+        model_i_mean = self.models[model_index_i].arm_means
+        model_i_sd = np.ones(shape = self.K)
+
+        model_j_mean = self.models[model_index_j].arm_means
+        model_j_sd = np.ones(shape = self.K)
+
+        true_hellinger_dist = np.zeros(shape = self.K)
+        for a in range(self.K):
+            mu_1_minus_mu_2 = (model_i_mean[a] - model_j_mean[a])**2
+            denom = (model_i_sd[a]**2) + (model_j_sd[a]**2)
+            true_hellinger_dist[a] = 1 - (np.sqrt((2 * model_i_sd[a] * model_j_sd[a]) / denom) * np.exp(-0.25 * mu_1_minus_mu_2/denom))
+
+        return true_hellinger_dist
+    
+    def compute_true_mean_square_divergence(self, model_index_i, model_index_j):
+        true_mean_square_dist = np.zeros(shape = self.K)
+        for a in range(self.K):
+            true_mean_square_dist[a] = (self.models[model_index_i].arm_means[a] - self.models[model_index_j].arm_means[a])**2
+        return true_mean_square_dist
     
