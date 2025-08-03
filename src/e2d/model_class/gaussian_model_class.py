@@ -13,15 +13,16 @@ class Gaussian_Model_Class(Model):
             d = np.random.randint(self.K)
             for i in range(0, K):
                 self.arms.append(Gaussian_Arm(np.random.normal(loc = 0,
-                                                        scale = 0.01) + (i * Delta),
-                                                        scale))
+                                                        scale = 0.01) + (2 * i * Delta),
+                                                        sd=0.5))
             temp_arm = self.arms[d]
             self.arms[d] = self.arms[K - 1]
             self.arms[K - 1] = temp_arm       
         else:
             d = np.argmax(arm_means)
             for i in range(K):
-                self.arms.append(Gaussian_Arm(arm_means[i] + Delta, scale))
+                self.arms.append(Gaussian_Arm(arm_means[i] + Delta, 
+                                              sd=0.5))
             
             if (d > 0):
                 temp_1 = self.arms[d]

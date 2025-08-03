@@ -4,6 +4,7 @@ import matplotlib.pyplot as plt
 import itertools
 import math
 from e2d.model_collection.gaussian_model_collection import Gaussian_Model_Collection
+from e2d.model_collection.bernoulli_model_collection import Bernoulli_Model_Collection
 from e2d.technical_tools.mc_estimator import MC_Estimator
 from e2d.players.exp3_player import Exp3_Player
 from e2d.players.dec_player import DEC_Player
@@ -26,6 +27,9 @@ class Meta_Algo():
         self.file_name = file_name
         self.sample_size_type = sample_size_type
         self.divergence_type = divergence_type
+        #self.model_class = Gaussian_Model_Collection(K = self.K, M = self.M, Optimality_Gap=self.optimality_gap)
+        self.model_class = Bernoulli_Model_Collection(K = self.K, M = self.M, Optimality_Gap=self.optimality_gap)
+        self.mc_estimator = MC_Estimator(finite_model_class = self.model_class)
 
     def compute_averaged_regret(self):
         self.players = []
@@ -40,6 +44,7 @@ class Meta_Algo():
                 
         for i in range(self.num_runs):
             self.model_class = Gaussian_Model_Collection(K = self.K, M = self.M, Optimality_Gap=self.optimality_gap)
+            #self.model_class = Bernoulli_Model_Collection(K = self.K, M = self.M, Optimality_Gap=self.optimality_gap)
             self.mc_estimator = MC_Estimator(finite_model_class = self.model_class)
 
             if (self.sample_size_type >= HOEFFDING_SAMPLE_SIZE):
@@ -90,7 +95,26 @@ class Meta_Algo():
         best_player = self.players[sorted_players[0]]
         return [np.mean(best_player.accumulated_regret, axis = 0), 
                 1.96 * (np.std(best_player.accumulated_regret, axis = 0) / np.sqrt(self.T)), 
-                best_player.label]
+                best_player.label,
+                best_player.gamma]
+    
+    def get_true_radon_nikodym_derivatives(self, dp_or_dq = 1, model_index_1 = 0, model_index_2 = 1, action = 0):
+        self.mc_estimator = MC_Estimator(finite_model_class = self.model_class)
+        x = np.linspace(-3, 3, num = 50)
+        y = np.zeros(shape = 50)
+        for i in range(50):
+            y[i] =  self.model_class.compute_true_radon_nikodym_derivative(model_index_1, model_index_2, x[i])[dp_or_dq][action]
+        return [x, y]
+    
+    def get_estimated_radon_nikodym_derivatives(self, m, dp_or_dq = 1, model_index_1 = 0, model_index_2 = 1, action = 0):
+        self.mc_estimator = MC_Estimator(finite_model_class = self.model_class)
+        self.mc_estimator.m = m
+        
+        x = np.linspace(-3, 3, num = 50)
+        y = self.mc_estimator.estimated_radon_nikodym_derivative(model_index_i=model_index_1,
+                                                                            model_index_j=model_index_2,
+                                                                            x = x)[dp_or_dq][action]
+        return [x, y]
     
     def get_sq_hellinger_map(self, m_hat_index, sq_hellinger_divergence_map):
         combs = list(itertools.combinations(range(self.M), 2))

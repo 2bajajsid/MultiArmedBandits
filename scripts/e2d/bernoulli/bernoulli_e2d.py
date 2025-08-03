@@ -11,23 +11,24 @@ from e2d.technical_tools.constants import HELLINGER_SQUARE
 
 np.random.seed(900)
 T = 2500 # Time Horizon
-K = 10 # Number of Arms
+K = 5 # Number of Arms
 M = 10 # Number of Models
 NUM_RUNS = 5000
 
-OPTIMALITY_GAP = 0.1
+OPTIMALITY_GAP = 0.025
 DELTA = 0.8
 
 GAP_STRING = "Low"
 MC_STRING = "V_Low_Sq"
+
 plt.rcParams["figure.figsize"] = (15,6)
 plt.switch_backend('Agg') 
 
 def target_func_1(m, label, reg, std, gamma):
     meta_algo = Meta_Algo(M = M, K = K, T = T, num_runs = NUM_RUNS,
                         optimality_gap=OPTIMALITY_GAP, delta=DELTA,
-                        file_name = "gaussian/Gaussian_{0}_Gap_{1}_MC.".format(GAP_STRING, MC_STRING),
-                        title = "Averaged Regret Over Time [Gaussian Model Class ({0} Gap, {1} MC)]".format(GAP_STRING, MC_STRING),
+                        file_name = "bernoulli/Bernoulli_{0}_Gap_{1}_MC.".format(GAP_STRING, MC_STRING),
+                        title = "Averaged Regret Over Time [Bernoulli Model Class ({0} Gap, {1} MC)]".format(GAP_STRING, MC_STRING),
                         sample_size_type=m,
                         divergence_type=HELLINGER_SQUARE)
     game_winner_stats = meta_algo.compute_averaged_regret()
@@ -77,7 +78,7 @@ if __name__ == '__main__':
                 label = labels[i] + "gamma: {}".format(gamma[i].value))
         
     plt.legend()
-    plt.title("Empirical Regret of E2D procedure on Gaussian model classes")
+    plt.title("Empirical Regret of E2D procedure on Bernoulli model classes")
     plt.xlabel("Time Step")
     plt.ylabel("Averaged Regret")
-    plt.savefig("/Users/sidbajaj/MultiArmedBandits/results/e2d/gaussian/Gaussian_e2d")
+    plt.savefig("/Users/sidbajaj/MultiArmedBandits/results/e2d/bernoulli/Bernoulli_e2d")

@@ -13,7 +13,7 @@ from e2d.players.dec_player import DEC_Player
 
 np.random.seed(900)
 T = 4000 # Time Horizon
-K = 5 # Number of Arms
+K = 10 # Number of Arms
 M = 10 # Number of Models
 NUM_RUNS = 500
 

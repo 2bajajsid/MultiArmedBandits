@@ -19,10 +19,10 @@ class Gaussian_Model_Collection(Finite_Model_Collection):
 
     def compute_true_sq_hellinger_divergence(self, model_index_i, model_index_j):
         model_i_mean = self.models[model_index_i].arm_means
-        model_i_sd = np.ones(shape = self.K)
+        model_i_sd = 0.5 * np.ones(shape = self.K)
 
         model_j_mean = self.models[model_index_j].arm_means
-        model_j_sd = np.ones(shape = self.K)
+        model_j_sd = 0.5 * np.ones(shape = self.K)
 
         true_hellinger_dist = np.zeros(shape = self.K)
         for a in range(self.K):
@@ -32,9 +32,29 @@ class Gaussian_Model_Collection(Finite_Model_Collection):
 
         return true_hellinger_dist
     
+    def compute_true_radon_nikodym_derivative(self, model_index_i, model_index_j, x, lambda_mixture = 1/2):
+        model_i_mean = self.models[model_index_i].arm_means
+        model_j_mean = self.models[model_index_j].arm_means
+
+        dp_over_dr = np.zeros(shape = self.K)
+        dq_over_dr = np.zeros(shape = self.K)
+        for a in range(self.K):
+            mu_q = model_i_mean[a]
+            mu_p = model_j_mean[a]
+            mu_r = (lambda_mixture * mu_p) + ((1 - lambda_mixture) * mu_q)
+            dp_over_dr[a] = np.exp(-1 * ((x - mu_p)**2 - (x - mu_r)**2) / 2)
+            dq_over_dr[a] = np.exp(-1 * ((x - mu_q)**2 - (x - mu_r)**2) / 2)
+        
+        radon_nikodym = np.zeros(shape = (2, self.K))
+        radon_nikodym[0, :] = dp_over_dr
+        radon_nikodym[1, :] = dq_over_dr
+
+        return radon_nikodym
+
     def compute_true_mean_square_divergence(self, model_index_i, model_index_j):
         true_mean_square_dist = np.zeros(shape = self.K)
         for a in range(self.K):
+            #print(self.models[model_index_i].arm_means[a] - self.models[model_index_j].arm_means[a])
             true_mean_square_dist[a] = (self.models[model_index_i].arm_means[a] - self.models[model_index_j].arm_means[a])**2
         return true_mean_square_dist
     

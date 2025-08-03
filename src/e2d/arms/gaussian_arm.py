@@ -12,12 +12,7 @@ class Gaussian_Arm(Arm):
     def draw_sample(self):
         normal_random = random.normal(loc = self.f_m, 
                              scale = self.f_sd)
-        if (normal_random > 1):
-            return 1
-        elif (normal_random < -1):
-            return -1
-        else:
-            return normal_random
+        return normal_random
     
     def get_mean(self):
         return self.f_m

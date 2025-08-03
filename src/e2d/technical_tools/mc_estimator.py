@@ -86,7 +86,45 @@ class MC_Estimator():
             for j in range(self.m):
                 sq_hellinger_hat_mc[j] = (np.sqrt(prediction_prob[j][0] / (1 - lambda_mixture)) - np.sqrt(prediction_prob[j][1] / (lambda_mixture)))**2
             sq_hellinger_hat[a] = np.mean(sq_hellinger_hat_mc)
-        return sq_hellinger_hat
+        return sq_hellinger_hat 
+    
+    def estimated_radon_nikodym_derivative(self, model_index_i, model_index_j, x):
+        print("Estimating with sampe size {}".format(self.m))
+        derivatives = np.zeros(shape = (2, self.K, len(x)))
+        sample_model_i = self.finite_model_class.draw_sample_from_model_index(model_index_i, self.m)
+        sample_model_j = self.finite_model_class.draw_sample_from_model_index(model_index_j, self.m)
+
+        for a in range(self.finite_model_class.K):
+            model_i_action_a = sample_model_i[a, :]
+            model_j_acton_a = sample_model_j[a, :]
+
+            lambda_mixture = 0.5
+            bootstrap_sample_x = []
+            y = np.random.binomial(n = 1, p = lambda_mixture, size = self.m)
+            y[0] = 0
+            y[1] = 1
+            for j in range(self.m):
+                if (y[j] == 0):
+                    bootstrap_sample_x.append([self.finite_model_class.draw_sample_from_model_index(model_index_i, 1)[a, 0]])
+                else:
+                    bootstrap_sample_x.append([self.finite_model_class.draw_sample_from_model_index(model_index_j, 1)[a, 0]])
+
+            clf = LogisticRegression(random_state=0, 
+                                     solver='liblinear',
+                                     max_iter=500).fit(bootstrap_sample_x, y)
+
+            y = np.random.binomial(n = 1, p = lambda_mixture, size = self.m)
+            for j in range(len(x)):
+                bootstrap_sample_x.append([x[j]])
+
+            prediction_prob = clf.predict_proba(bootstrap_sample_x)
+
+            for j in range(len(x)):
+                derivatives[1][a][j] = prediction_prob[j][0] / (1 - lambda_mixture)
+                derivatives[0][a][j] = prediction_prob[j][1] / (lambda_mixture)
+            
+        return derivatives
+
     
     def estimate_mean_square_divergence(self,  model_index_i, model_index_j):
         sample_model_i = self.finite_model_class.draw_sample_from_model_index(model_index_i, self.m)
@@ -98,6 +136,11 @@ class MC_Estimator():
             model_j_acton_a = sample_model_j[a, :]
             sq_hellinger_hat_mc = np.zeros(shape=self.m)
             for j in range(self.m):
+                #print("Real: {}".format((self.finite_model_class.models[model_index_i].arm_means[a] - 
+                #                        self.finite_model_class.models[model_index_j].arm_means[a])**2))
+                #print("Model_i_action_a: {}".format(model_i_action_a[j]))
+                #print("Model_j_acton_a: {}".format(model_j_acton_a[j]))
+                #print("Fake: {}".format((model_i_action_a[j] - model_j_acton_a[j])**2))
                 sq_hellinger_hat_mc[j] = (model_i_action_a[j] - model_j_acton_a[j])**2
             sq_hellinger_hat[a] = np.mean(sq_hellinger_hat_mc)
         return sq_hellinger_hat
@@ -118,6 +161,34 @@ class MC_Estimator():
                 else:
                     self.sq_hellinger_divergence_hat[s, :] = self.finite_model_class.compute_true_sq_hellinger_divergence(model_index_i, model_index_j)
         return self.sq_hellinger_divergence_hat
+    
+    def get_bias_of_divergence_hat(self, divergence_type):
+        self.bias_divergence_hat = np.zeros(shape = (len(self.combs), self.finite_model_class.K))
+        self.true_divergence = np.zeros(shape = (len(self.combs), self.finite_model_class.K))
+        for s in range(len(self.combs)):
+            model_index_i = self.combs[s][0]
+            model_index_j = self.combs[s][1]
+            if (divergence_type == HELLINGER_SQUARE):
+                estimated_divergence_s = self.estimate_sq_hellinger_divergence(model_index_i=model_index_i, 
+                                                                                  model_index_j=model_index_j)
+                true_divergence_s = self.finite_model_class.compute_true_sq_hellinger_divergence(model_index_i, 
+                                                                                                    model_index_j)
+            else:
+                estimated_divergence_s = self.estimate_mean_square_divergence(model_index_i=model_index_i, 
+                                                                                 model_index_j=model_index_j)
+                true_divergence_s = self.finite_model_class.compute_true_mean_square_divergence(model_index_i, 
+                                                                                                   model_index_j)
+                
+            self.bias_divergence_hat[s, :] = estimated_divergence_s - true_divergence_s
+            self.true_divergence[s, :] = true_divergence_s
+
+        bias_hat_flat = self.bias_divergence_hat.flatten()
+        sq_hellinger_flat = self.true_divergence.flatten()
+        
+        return [np.mean(bias_hat_flat),
+                np.mean(sq_hellinger_flat),
+                np.std(bias_hat_flat),
+                bias_hat_flat]
     
     def get_squared_hellinger_distance_lower_bound(self, optimality_gap, sigma_p=1.0, sigma_q=1.0):
         return (1 - np.sqrt(1 - (optimality_gap**2 / (optimality_gap**2 + (sigma_p + sigma_q)**2))))

@@ -5,20 +5,31 @@ from e2d.model_class.model import Model
 import math
 
 class Bernoulli_Model_Class(Model):
-    def __init__(self, Delta, K=2, scale = 0.5):
+    def __init__(self, Delta, K=2, scale = 0.5, arm_means = []):
         super().__init__()
         self.arms = []
         self.K = K
-        d = np.random.randint(self.K)
-        for i in range(0, K):
-            if (i == d):
-                mean = np.abs(np.random.normal(loc = Delta, scale = 0.01))
-                mean = (mean if mean < 1.0 else 0.99)
-                self.arms.append(Bernoulli_Arm(mean))
+        if (len(arm_means) == 0):
+            d = np.random.randint(self.K)
+            for i in range(0, K):
+                self.arms.append(Bernoulli_Arm(np.abs(np.random.normal(loc = 0, scale = 0.01)) + (2 * i * Delta)))
+            temp_arm = self.arms[d]
+            self.arms[d] = self.arms[K - 1]
+            self.arms[K - 1] = temp_arm       
+        else:
+            d = np.argmax(arm_means)
+            for i in range(K):
+                self.arms.append(Bernoulli_Arm(arm_means[i] + Delta))
+            
+            if (d > 0):
+                temp_1 = self.arms[d]
+                self.arms[d] = self.arms[d-1]
+                self.arms[d-1] = temp_1
             else:
-                mean = np.abs(np.random.normal(loc = 0, scale = 0.01))
-                mean = (mean if mean < 1.0 else 0.99)
-                self.arms.append(Bernoulli_Arm(mean))
+                temp_1 = self.arms[d]
+                self.arms[d] = self.arms[d+1]
+                self.arms[d+1] = temp_1
+
         self.arm_means = np.zeros(shape = self.K)
         for i in range(K):
             self.arm_means[i] = self.arms[i].get_mean()
