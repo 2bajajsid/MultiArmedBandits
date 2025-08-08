@@ -5,7 +5,7 @@ from e2d.model_class.gaussian_model_class import Gaussian_Model_Class
 import math
 
 class Gaussian_Model_Collection(Finite_Model_Collection):
-    def __init__(self, M = 10, K = 2, Optimality_Gap = 0.25):
+    def __init__(self, M = 3, K = 5, Optimality_Gap = 0.25):
         super().__init__()
         self.M = M
         self.K = K
@@ -13,6 +13,19 @@ class Gaussian_Model_Collection(Finite_Model_Collection):
         self.models.append(Gaussian_Model_Class(K = self.K, Delta = Optimality_Gap))
         for i in range(1, self.M):
             self.models.append(Gaussian_Model_Class(K = self.K, Delta = Optimality_Gap, arm_means = self.models[i-1].arm_means))
+        
+        self.mean_matrix = np.zeros(shape = (M, K))
+        self.mean_matrix[0, :] = [0.8, 0.2, 0.4, 0.6, 0.0]
+        self.mean_matrix[1, :] = [0.3, 0.9, 0.55, 0.8, 0.1]
+        self.mean_matrix[2, :] = [0.45, 0.65, 1.0, 0.75, 0.3]
+        self.multipliers = [-1, 1]
+        self.multiplier = self.multipliers[np.random.randint(len(self.multipliers), size=1)[0]]
+
+        for m in range(self.M):
+            for k in range(self.K):
+                self.models[m].arms[k].f_m = self.multiplier * self.mean_matrix[m][k]
+                self.models[m].arm_means[k] = self.multiplier * self.mean_matrix[m][k]
+
         self.M_star = np.random.randint(self.M)
         self.pi_star = self.models[self.M_star].get_optimal_arm_index()
         self.t = 0
@@ -28,9 +41,12 @@ class Gaussian_Model_Collection(Finite_Model_Collection):
         for a in range(self.K):
             mu_1_minus_mu_2 = (model_i_mean[a] - model_j_mean[a])**2
             denom = (model_i_sd[a]**2) + (model_j_sd[a]**2)
-            true_hellinger_dist[a] = 1 - (np.sqrt((2 * model_i_sd[a] * model_j_sd[a]) / denom) * np.exp(-0.25 * mu_1_minus_mu_2/denom))
+            true_hellinger_dist[a] = 1 - (np.sqrt(((2 * model_i_sd[a] * model_j_sd[a]) / denom)) * np.exp(-0.25 * mu_1_minus_mu_2/denom))
 
         return true_hellinger_dist
+    
+    def get_squared_hellinger_distance_lower_bound(self, optimality_gap, sigma_p=0.5, sigma_q=0.5):
+        return (1 - np.sqrt(1 - (optimality_gap**2 / (optimality_gap**2 + (sigma_p + sigma_q)**2))))
     
     def compute_true_radon_nikodym_derivative(self, model_index_i, model_index_j, x, lambda_mixture = 1/2):
         model_i_mean = self.models[model_index_i].arm_means

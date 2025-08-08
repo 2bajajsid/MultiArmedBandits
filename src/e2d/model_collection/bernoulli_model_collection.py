@@ -13,6 +13,19 @@ class Bernoulli_Model_Collection(Finite_Model_Collection):
         self.models.append(Bernoulli_Model_Class(K = self.K, Delta = Optimality_Gap))
         for i in range(1, self.M):
             self.models.append(Bernoulli_Model_Class(K = self.K, Delta = Optimality_Gap, arm_means = self.models[i-1].arm_means))
+
+        self.mean_matrix = np.zeros(shape = (M, K))
+        self.mean_matrix[0, :] = [0.8, 0.2, 0.4, 0.6, 0.0]
+        self.mean_matrix[1, :] = [0.3, 0.9, 0.55, 0.8, 0.1]
+        self.mean_matrix[2, :] = [0.45, 0.65, 1.0, 0.75, 0.3]
+        self.multipliers = [1.0]
+        self.multiplier = self.multipliers[np.random.randint(len(self.multipliers), size=1)[0]]
+
+        for m in range(self.M):
+            for k in range(self.K):
+                self.models[m].arms[k].f_m = 1.0 * self.mean_matrix[m][k]
+                self.models[m].arm_means[k] = 1.0 * self.mean_matrix[m][k]
+
         self.M_star = np.random.randint(self.M)
         self.pi_star = self.models[self.M_star].get_optimal_arm_index()
         self.t = 0

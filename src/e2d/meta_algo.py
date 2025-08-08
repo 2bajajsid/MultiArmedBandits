@@ -9,11 +9,11 @@ from e2d.technical_tools.mc_estimator import MC_Estimator
 from e2d.players.exp3_player import Exp3_Player
 from e2d.players.dec_player import DEC_Player
 from e2d.oracle.exp_weights_oracle import Exp_Weights_Oracle
-from e2d.technical_tools.constants import ASYMPTOTIC_SAMPLE_SIZE, HOEFFDING_SAMPLE_SIZE
+from e2d.technical_tools.constants import HOEFFDING_SAMPLE_SIZE, GAUSSIAN_MODELS, BERNOULLI_MODELS
 
 # This is a Meta-Algorithm
 class Meta_Algo():
-    def __init__(self, M, K, T, num_runs, title, file_name, optimality_gap, delta, sample_size_type, divergence_type):
+    def __init__(self, M, K, T, num_runs, title, file_name, optimality_gap, delta, sample_size_type, divergence_type, type_model):
         super().__init__()
         self.M = M # number of models
         self.K = K # number of arms
@@ -27,24 +27,28 @@ class Meta_Algo():
         self.file_name = file_name
         self.sample_size_type = sample_size_type
         self.divergence_type = divergence_type
+        self.model_type = type_model
         #self.model_class = Gaussian_Model_Collection(K = self.K, M = self.M, Optimality_Gap=self.optimality_gap)
-        self.model_class = Bernoulli_Model_Collection(K = self.K, M = self.M, Optimality_Gap=self.optimality_gap)
-        self.mc_estimator = MC_Estimator(finite_model_class = self.model_class)
+        #self.model_class = Bernoulli_Model_Collection(K = self.K, M = self.M, Optimality_Gap=self.optimality_gap)
+        #self.mc_estimator = MC_Estimator(finite_model_class = self.model_class)
 
     def compute_averaged_regret(self):
         self.players = []
         #self.players.append(Exp3_Player(M = self.M, T = self.T, K = self.K, numRuns = self.num_runs, 
         #                                algEst=Exp_Weights_Oracle(T = self.T, M = self.M, K = self.K), label="EXP3"))
         
-        gamma = [0.1, 1.0, 5.0, 10.0, 500.0, 1000.0]
+        gamma =  [0.1, 1.0, 5.0, 10.0, 500.0, 1000.0]
         for g in range(len(gamma)):
             self.players.append(DEC_Player(M = self.M, T = self.T, K = self.K, numRuns = self.num_runs, 
                                             algEst=Exp_Weights_Oracle(T = self.T, M = self.M, K =self.K), 
-                            gamma = gamma[g], label="gamma: {}".format(gamma[g])))
+                            gamma = -1 * gamma[g], label="sample_size_type: {}, gamma: {}".format(self.sample_size_type, 
+                                                                                             gamma[g])))
                 
         for i in range(self.num_runs):
-            self.model_class = Gaussian_Model_Collection(K = self.K, M = self.M, Optimality_Gap=self.optimality_gap)
-            #self.model_class = Bernoulli_Model_Collection(K = self.K, M = self.M, Optimality_Gap=self.optimality_gap)
+            if (self.model_type == GAUSSIAN_MODELS):
+                self.model_class = Gaussian_Model_Collection(K = self.K, M = self.M, Optimality_Gap=self.optimality_gap)
+            else:
+                self.model_class = Bernoulli_Model_Collection(K = self.K, M = self.M, Optimality_Gap=self.optimality_gap)
             self.mc_estimator = MC_Estimator(finite_model_class = self.model_class)
 
             if (self.sample_size_type >= HOEFFDING_SAMPLE_SIZE):
@@ -85,8 +89,8 @@ class Meta_Algo():
         #    player_i.plot_averaged_regret()
         #    print("Player {} has final averaged regret {} with std {}".format(player_i.label, 
         #                                                                      np.mean(player_i.accumulated_regret, axis = 0)[self.T - 1], 
-         #                                                                     np.std(player_i.accumulated_regret, axis = 0)[self.T - 1] / 
-         #                                                                     np.sqrt(player_i.numRuns)))
+        #                                                                     np.std(player_i.accumulated_regret, axis = 0)[self.T - 1] / 
+        #                                                                     np.sqrt(player_i.numRuns)))
         
         #plt.legend()
         #plt.savefig("/Users/sidbajaj/MultiArmedBandits/results/e2d/" + self.file_name)

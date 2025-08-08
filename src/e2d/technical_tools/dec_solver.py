@@ -34,7 +34,7 @@ class DEC_Solver():
                 for m in range(self.M):
                     r += (p_exp[m] * self.hell_div_hat[m][i][j])
                     #r += (p_exp[m] * (np.abs(self.f_m_hat[i][j] - self.f_m_hat[m][j])**2))
-                A_ub[i][j + 1] = (-1 * ((gamma * r) + self.f_m_hat[i][j]))
+                A_ub[i][j + 1] = (((gamma * r) - self.f_m_hat[i][j]))
 
         # ensuring that p is in the simplex
         A_eq = np.ones(shape = (1, self.K + 1))

@@ -7,16 +7,16 @@ from numpy import random
 from threading import Thread
 import multiprocessing as mp
 from e2d.meta_algo import Meta_Algo
-from e2d.technical_tools.constants import HELLINGER_SQUARE
+from e2d.technical_tools.constants import HELLINGER_SQUARE, BERNOULLI_MODELS
 
 np.random.seed(900)
 T = 2500 # Time Horizon
 K = 5 # Number of Arms
-M = 10 # Number of Models
-NUM_RUNS = 5000
+M = 3 # Number of Models
+NUM_RUNS = 1000
 
 OPTIMALITY_GAP = 0.025
-DELTA = 0.8
+DELTA = 0.25
 
 GAP_STRING = "Low"
 MC_STRING = "V_Low_Sq"
@@ -30,7 +30,8 @@ def target_func_1(m, label, reg, std, gamma):
                         file_name = "bernoulli/Bernoulli_{0}_Gap_{1}_MC.".format(GAP_STRING, MC_STRING),
                         title = "Averaged Regret Over Time [Bernoulli Model Class ({0} Gap, {1} MC)]".format(GAP_STRING, MC_STRING),
                         sample_size_type=m,
-                        divergence_type=HELLINGER_SQUARE)
+                        divergence_type=HELLINGER_SQUARE,
+                        type_model=BERNOULLI_MODELS)
     game_winner_stats = meta_algo.compute_averaged_regret()
     for s in range(T):
         reg[s] = game_winner_stats[0][s]
@@ -38,11 +39,11 @@ def target_func_1(m, label, reg, std, gamma):
     gamma.value = game_winner_stats[3]
     
 threads = []
-sample_sizes = [-1, 10, 50, 250]
-labels = ['True Hellinger Square, ', 
-          'm: 10, ', 
-          'm: 50, ', 
-          'm: 250, ']
+sample_sizes = [100, 0, 2, -1]
+labels = ['m: 50, ',
+          'Hoeffdings, ',
+          'Asymptotics, ',
+          'True Hellinger Square, ']
 
 if __name__ == '__main__':
     ctx = mp.get_context('spawn')
@@ -72,10 +73,11 @@ if __name__ == '__main__':
         for t in range(T):
             reg[t] = empirical_regret[i][t] 
             std[t] = empirical_std[i][t]
-        plt.errorbar(x = range(T),
-                y = reg, 
-                yerr = std, 
-                label = labels[i] + "gamma: {}".format(gamma[i].value))
+        plt.errorbar(x = range(T)[0::10],
+                y = reg[0::10], 
+                yerr = std[0::10], 
+                label = labels[i] + "gamma: {}".format(gamma[i].value),
+                alpha=0.5)
         
     plt.legend()
     plt.title("Empirical Regret of E2D procedure on Bernoulli model classes")

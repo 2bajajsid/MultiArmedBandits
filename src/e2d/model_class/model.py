@@ -15,5 +15,5 @@ class Model(ABC):
         pass
 
     def get_delta(self):
-        arms_sorted = np.abs(np.diff(self.arm_means))
+        arms_sorted = np.abs(np.diff(np.sort(self.arm_means)))
         return np.min(arms_sorted)

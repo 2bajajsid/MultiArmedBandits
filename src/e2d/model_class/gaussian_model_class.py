@@ -17,11 +17,11 @@ class Gaussian_Model_Class(Model):
                                                         sd=0.5))
             temp_arm = self.arms[d]
             self.arms[d] = self.arms[K - 1]
-            self.arms[K - 1] = temp_arm       
+            self.arms[K - 1] = temp_arm   
         else:
             d = np.argmax(arm_means)
             for i in range(K):
-                self.arms.append(Gaussian_Arm(arm_means[i] + Delta, 
+                self.arms.append(Gaussian_Arm(arm_means[i] + (Delta), 
                                               sd=0.5))
             
             if (d > 0):
@@ -36,7 +36,7 @@ class Gaussian_Model_Class(Model):
         self.arm_means = np.zeros(shape = self.K)
         for i in range(K):
             self.arm_means[i] = self.arms[i].get_mean()
-    
+        
     def get_optimal_arm_index(self):
         return np.argmax(self.arm_means)
 

@@ -1,6 +1,7 @@
 from abc import ABC, abstractmethod
 import numpy as np
 from numpy import random
+import itertools
 
 # Abstract class for a finite model collection; 
 # Each model class contains references to a finite number of models
@@ -29,11 +30,13 @@ class Finite_Model_Collection(ABC):
 
     def get_delta_delta_min(self):
         delta_min_min = np.inf
-        for i in range(1, len(self.models)):
-            arm_means_i_minus_1 = self.models[i-1].arm_means 
-            arm_means_i = self.models[i].arm_means
-            arm_means_diff = np.min(np.abs(arm_means_i_minus_1 - arm_means_i))
-            delta_min_min = np.min([arm_means_diff, delta_min_min])
+        self.combs = list(itertools.combinations(range(self.M), 2))
+        for s in range(len(self.combs)):
+            model_index_i = self.combs[s][0]
+            model_index_j = self.combs[s][1]
+            hellinger_squared_divergence = np.sort(self.compute_true_sq_hellinger_divergence(model_index_i, model_index_j))
+            delta_min_min = np.min([delta_min_min, 
+                                    np.min(np.abs(np.diff(hellinger_squared_divergence)))])
         return delta_min_min
     
     def print_description(self):
