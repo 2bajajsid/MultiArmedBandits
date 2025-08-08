@@ -23,7 +23,7 @@ class Bandit_Algorithm_FI(ABC):
 class Bandit_Algorithm_PI(ABC):
 
     @abstractmethod
-    def get_arm_to_pull(self, importance_weighted_losses, losses, t):
+    def get_arm_to_pull(self, t):
         pass
 
     @property

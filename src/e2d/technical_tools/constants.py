@@ -1,0 +1,12 @@
+# Type for Sample Size Calculations:
+HOEFFDING_SAMPLE_SIZE = 0
+SUBGAUSSIAN_SAMPLE_SIZE = 1
+ASYMPTOTIC_SAMPLE_SIZE = 2
+
+# Type for Estimating Divergence 
+MEAN_SQUARE = 0
+HELLINGER_SQUARE = 1 
+
+# Type of Model
+GAUSSIAN_MODELS = 0
+BERNOULLI_MODELS = 1
