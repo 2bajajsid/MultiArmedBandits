@@ -3,14 +3,32 @@ import matplotlib.pyplot as plt
 import numpy as np
 
 class PlayGround:
-    def __init__(self, gap, games, hyperparameters, plot_label, plot_directory):
+    def __init__(self, games, plot_label, 
+                 plot_directory, hyperparameters = [], gap = 0.0):
         self.games = games
-        self.hyperparameters = hyperparameters
         self.label = plot_label
         self.plot_directory = plot_directory
+
         self.horizon = self.games[0].data_generating_mechanism.get_T()
         self.num_runs = self.games[0].data_generating_mechanism.get_M()
         self.gap = gap
+        self.hyperparameters = hyperparameters
+
+    def plot_regret(self):
+        plt.rcParams["figure.figsize"] = (15,6)
+        fig, ax = plt.subplots()
+
+        for g in range(len(self.games)):
+            plt.plot(range(self.horizon), 
+                    self.games[g].compute_averaged_regret(0), 
+                    label = "{}".format(self.games[g].label))
+            
+        plt.legend()
+        plt.title("Instantaneuous Regret (T = {}, M = {})".format(self.horizon, self.num_runs))
+        plt.ylabel('Average Instantaneuous Regret')
+        plt.xlabel('Round n')
+        plt.savefig(self.label)
+        plt.close()
 
     def plot_regret_as_function_of_hyperparameters(self, vlines):
         regret_final = np.zeros(shape=len(self.hyperparameters[0]))

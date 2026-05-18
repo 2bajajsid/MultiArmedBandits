@@ -17,6 +17,7 @@ class Follow_The_Leader_FI(Bandit_Algorithm_FI):
         self.init_exploration = data_generating_mechanism.get_init_exploration()
         self.__label = "Follow The Leader"
         self.__data_generating_mechanism = data_generating_mechanism
+        self.prob_distr = np.ones(self.K) / self.K
 
     @property
     def data_generating_mechanism(self):
@@ -26,9 +27,17 @@ class Follow_The_Leader_FI(Bandit_Algorithm_FI):
     def label(self):
         return self.__label
 
-    def get_arm_to_pull(self, losses, t):
-        arm_estimates_current_round = np.mean(losses, axis = 1)
-        return np.argmin(arm_estimates_current_round)
+    def get_arm_to_pull(self, losses, t, extra_param):
+        if (t < self.exploration_phase_length):
+            return math.floor(t / self.init_exploration)
+        else:
+            arm_estimates_current_round = np.mean(losses, axis = 1)
+            self.prob_distr = np.zeros(self.K)
+            self.prob_distr[np.argmin(arm_estimates_current_round)] = 1
+            return np.argmin(arm_estimates_current_round)
+        
+    def get_arm_distribution(self):
+        return self.prob_distr
         
 class Follow_The_Leader_PI(Bandit_Algorithm_PI):
     def __init__(self, data_generating_mechanism):
@@ -79,5 +88,7 @@ class Follow_The_Leader_PI(Bandit_Algorithm_PI):
 
             if (z == 1):
                 A_t = random.randint(low = 0, high = self.K, size = 1)
+
+            
             
             return A_t

@@ -28,6 +28,9 @@ class Data_Generating_Mechanism(ABC):
     
     def get_mu_arm_i(self, i):
         return self.__mu_arms[i]
+    
+    def get_mu_arms(self):
+        return self.__mu_arms
 
     @abstractmethod
     def get_rewards(self, t):

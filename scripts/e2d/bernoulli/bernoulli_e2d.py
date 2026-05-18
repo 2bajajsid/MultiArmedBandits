@@ -16,7 +16,7 @@ M = 3 # Number of Models
 NUM_RUNS = 1000
 
 OPTIMALITY_GAP = 0.025
-DELTA = 0.25
+DELTA = 0.1
 
 GAP_STRING = "Low"
 MC_STRING = "V_Low_Sq"
@@ -39,7 +39,7 @@ def target_func_1(m, label, reg, std, gamma):
     gamma.value = game_winner_stats[3]
     
 threads = []
-sample_sizes = [100, 0, 2, -1]
+sample_sizes = [50, 0, 2, -1]
 labels = ['m: 50, ',
           'Hoeffdings, ',
           'Asymptotics, ',
@@ -83,4 +83,4 @@ if __name__ == '__main__':
     plt.title("Empirical Regret of E2D procedure on Bernoulli model classes")
     plt.xlabel("Time Step")
     plt.ylabel("Averaged Regret")
-    plt.savefig("/Users/sidbajaj/MultiArmedBandits/results/e2d/bernoulli/Bernoulli_e2d")
+    plt.savefig("/Users/sidbajaj/MultiArmedBandits/results/e2d/bernoulli/Bernoulli_e2d_point_one")

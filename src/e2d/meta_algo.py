@@ -41,7 +41,7 @@ class Meta_Algo():
         for g in range(len(gamma)):
             self.players.append(DEC_Player(M = self.M, T = self.T, K = self.K, numRuns = self.num_runs, 
                                             algEst=Exp_Weights_Oracle(T = self.T, M = self.M, K =self.K), 
-                            gamma = -1 * gamma[g], label="sample_size_type: {}, gamma: {}".format(self.sample_size_type, 
+                            gamma = 1 * gamma[g], label="sample_size_type: {}, gamma: {}".format(self.sample_size_type, 
                                                                                              gamma[g])))
                 
         for i in range(self.num_runs):

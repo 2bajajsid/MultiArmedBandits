@@ -241,7 +241,7 @@ class MC_Estimator():
                 self.beta = res.x
                 self.m_1 = int(np.ceil(self.func_1(self.beta)))
                 self.m_2 = int(np.ceil(self.func_2(self.beta)))
-                self.m_2 = np.min([1000000, self.m_2])
+                self.m_2 = np.min([2000000, self.m_2])
                 print("MC sample size for controlling prob. of bad event with small delta {0} on model gaps {1}, {2} is {3}, {4}"
                       .format(delta, self.optimality_gap, self.delta_delta, self.m_1, self.m_2))
             elif (type == SUBGAUSSIAN_SAMPLE_SIZE):
@@ -251,7 +251,7 @@ class MC_Estimator():
                 self.beta = res.x
                 self.m_1 = int(np.ceil(self.func_1(self.beta)))
                 self.m_2 = int(np.ceil(self.func_2(self.beta)))
-                self.m_2 = np.min([1000000, self.m_2])
+                self.m_2 = np.min([2000000, self.m_2])
                 print("Subgaussian")
                 print("MC sample size for controlling prob. of bad event with small delta {0} on model gaps {1}, {2} is {3}, {4}"
                       .format(delta, self.optimality_gap, self.delta_delta, self.m_1, self.m_2))
@@ -262,7 +262,7 @@ class MC_Estimator():
                 self.beta = res.x
                 self.m_1 = int(np.ceil(self.func_1(self.beta)))
                 self.m_2 = int(np.ceil(self.func_2(self.beta)))
-                self.m_2 = np.min([1000000, self.m_2])
+                self.m_2 = np.min([2000000, self.m_2])
                 print("Asymptotic")
                 print("MC sample size for controlling prob. of bad event with small delta {0} on model gaps {1}, {2} is {3}, {4}"
                       .format(delta, self.optimality_gap, self.delta_delta, self.m_1, self.m_2))

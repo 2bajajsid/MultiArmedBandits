@@ -18,7 +18,7 @@ class Gaussian_Model_Collection(Finite_Model_Collection):
         self.mean_matrix[0, :] = [0.8, 0.2, 0.4, 0.6, 0.0]
         self.mean_matrix[1, :] = [0.3, 0.9, 0.55, 0.8, 0.1]
         self.mean_matrix[2, :] = [0.45, 0.65, 1.0, 0.75, 0.3]
-        self.multipliers = [-1, 1]
+        self.multipliers = [-5, -4, -3, -2, -1, 1, 1, 2, 3, 4, 5]
         self.multiplier = self.multipliers[np.random.randint(len(self.multipliers), size=1)[0]]
 
         for m in range(self.M):

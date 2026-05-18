@@ -25,7 +25,7 @@ class BaggingFromThePast_FI(Bandit_Algorithm_FI):
     def label(self):
         return self.__label
 
-    def get_arm_to_pull(self, losses, t):
+    def get_arm_to_pull(self, losses, t, extra_param):
         if (t < self.exploration_phase_length):
             return math.floor(t / self.init_exploration)
         else:

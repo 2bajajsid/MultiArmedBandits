@@ -3,9 +3,9 @@ import numpy as np
 from numpy import random
 
 class Game:
-    def __init__(self, bandit_algorithm):
+    def __init__(self, bandit_algorithm, data_generating_mechanism):
         self.bandit_algorithm = bandit_algorithm
-        self.data_generating_mechanism = self.bandit_algorithm.data_generating_mechanism
+        self.data_generating_mechanism = data_generating_mechanism
         self.accumulated_regret = np.zeros(shape=(self.data_generating_mechanism.get_M(), 
                                                   self.data_generating_mechanism.get_T()))
         self.label = self.bandit_algorithm.label
@@ -18,20 +18,18 @@ class Game:
         print("Simulating with parameter {}".format(hyperparameter))
         for i in range(self.data_generating_mechanism.get_M()):
             self.accumulated_regret[i, :] = self.simulate_one_run(hyperparameter)
-            if i % 1000 == 0:
-                print(hyperparameter)
-                print('m = {:d}'.format(i))
-                print(self.accumulated_regret[i, 999])
+            if i % 10 == 0:
+                print(i)
             
-        self.compute_regret_sub()    
-        print('Average Regret of delta {} over {} runs calculated (median: {} mean: {} std: {})'
-              .format(self.data_generating_mechanism.delta, 
-                      self.data_generating_mechanism.prior_samples,
-                      np.median(self.regret_sub_mean),
-                      np.mean(self.regret_sub_mean), 
-                      np.std(self.regret_sub_mean) / np.sqrt(self.data_generating_mechanism.prior_samples)))
+        # self.compute_regret_sub()    
+        # print('Average Regret of delta {} over {} runs calculated (median: {} mean: {} std: {})'
+        #      .format(self.data_generating_mechanism.delta, 
+        #              self.data_generating_mechanism.prior_samples,
+        #              np.median(self.regret_sub_mean),
+        #              np.mean(self.regret_sub_mean), 
+        #              np.std(self.regret_sub_mean) / np.sqrt(self.data_generating_mechanism.prior_samples)))
         
-        return np.mean(self.regret_sub_mean)
+        return np.mean(self.accumulated_regret, axis=0)
         
     def compute_regret_sub(self):
         self.regret_final = self.get_regret_final()

@@ -4,20 +4,27 @@ from data_generating_mechanism.data_generating_mechanism import Data_Generating_
 
 class Low_Gap_Stochastic(Data_Generating_Mechanism):
         
-    def __init__(self, num_arms = 25, time_horizon = 2000, init_exploration = 1):
-        mu_arms = np.random.uniform(low = 0.25, high = 0.75, size = num_arms)
-        optimal_arm_index = np.flip(np.argsort(mu_arms))[0]
-        second_optimal_arm_index = np.flip(np.argsort(mu_arms))[1]
-        mu_arms[second_optimal_arm_index] = mu_arms[optimal_arm_index] - 0.05
+    def __init__(self, num_arms = 25, init_exploration = 1, optimality_gap = 0.02, M = 100):
+        mu_arms = np.random.uniform(low = 0.25, high = 1.5, size = num_arms)
+
+        self.second_optimal_arm_index = np.flip(np.argsort(mu_arms))[1]
+        self.optimal_arm_index = np.flip(np.argsort(mu_arms))[0]
+        mu_arms[self.optimal_arm_index] = mu_arms[self.second_optimal_arm_index] + optimality_gap
+
+        time_horizon = int(np.ceil(np.log(num_arms) / (0.05**2))) * 4
+
+        A = np.random.rand(num_arms, num_arms)
+        self.vcov = np.dot(A, A.T)
+        self.vcov += (np.eye(num_arms) * 1e-6)
+
         super().__init__(time_horizon = time_horizon, 
                          mu_arms = mu_arms, 
-                         num_runs = 100, 
+                         num_runs = M, 
                          init_exploration = init_exploration)
-
+        
     def get_rewards(self, t):
-        rewards = np.zeros(shape = self.get_K())
-
-        for i in range(self.get_K()):
-            rewards[i] = random.binomial(n = 1, p = self.get_mu_arm_i(i))
-
+        rng = np.random.default_rng()
+        rewards = rng.multivariate_normal(self.get_mu_arms(),  
+                                          cov = self.vcov, 
+                                          size = 1)[0]
         return rewards

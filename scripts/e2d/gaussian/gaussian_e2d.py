@@ -13,10 +13,10 @@ np.random.seed(900)
 T = 2500 # Time Horizon
 K = 5 # Number of Arms
 M = 3 # Number of Models
-NUM_RUNS = 50
+NUM_RUNS = 1000
 
 OPTIMALITY_GAP = 0.5
-DELTA = 0.8
+DELTA = 0.1
 
 GAP_STRING = "Low"
 MC_STRING = "V_Low_Sq"
@@ -82,4 +82,4 @@ if __name__ == '__main__':
     plt.title("Empirical Regret of E2D procedure on Gaussian model classes")
     plt.xlabel("Time Step")
     plt.ylabel("Averaged Regret")
-    plt.savefig("/Users/sidbajaj/MultiArmedBandits/results/e2d/gaussian/Gaussian_e2d_point_o_eight_neg")
+    plt.savefig("/Users/sidbajaj/MultiArmedBandits/results/e2d/gaussian/Gaussian_e2d_point_o_one")
