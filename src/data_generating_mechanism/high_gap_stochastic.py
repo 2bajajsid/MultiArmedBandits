@@ -14,7 +14,7 @@ class High_Gap_Stochastic(Data_Generating_Mechanism):
         self.optimal_arm_index = np.flip(np.argsort(mu_arms))[0]
         mu_arms[self.optimal_arm_index] = mu_arms[self.second_optimal_arm_index] + optimality_gap
 
-        time_horizon = 2000
+        time_horizon = 1000
 
         A = np.random.rand(num_arms, num_arms)
         self.vcov = np.dot(A, A.T)

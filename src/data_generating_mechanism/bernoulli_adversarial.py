@@ -4,7 +4,7 @@ from data_generating_mechanism.data_generating_mechanism import Data_Generating_
 
 class Bernoulli_Adversarial(Data_Generating_Mechanism):
         
-    def __init__(self, time_horizon = 2000, num_arms = 8, M = 100):
+    def __init__(self, time_horizon = 1000, num_arms = 8, M = 100):
         mu_arms = (1/2) * np.ones(shape = num_arms)
         super().__init__(time_horizon = time_horizon, 
                          mu_arms = mu_arms, 

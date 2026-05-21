@@ -4,7 +4,7 @@ from data_generating_mechanism.data_generating_mechanism import Data_Generating_
 
 class Flip_Flop_Mechanism(Data_Generating_Mechanism):
         
-    def __init__(self, time_horizon = 400, num_arms = 10, M = 100):
+    def __init__(self, time_horizon = 1000, num_arms = 10, M = 100):
         mu_arms = np.random.uniform(low = 0.1, high = 0.5, size = num_arms)
         super().__init__(time_horizon = time_horizon, 
                          mu_arms = mu_arms, 

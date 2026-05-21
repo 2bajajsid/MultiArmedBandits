@@ -4,9 +4,9 @@ from data_generating_mechanism.data_generating_mechanism import Data_Generating_
 
 class Fixed_Low_Rank_Exp_2(Data_Generating_Mechanism):
         
-    def __init__(self, M = 100):
+    def __init__(self, M = 100, gap = 0.1):
         
-        mu_arms = [0.5, 0.95]
+        mu_arms = [0.5, 0.5 + gap]
         self.A = np.array([
                         [1, 0],
                         [1, 0],

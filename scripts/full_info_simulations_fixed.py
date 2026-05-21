@@ -21,34 +21,38 @@ from threading import Thread
 import multiprocessing as mp
 
 NUM_ARMS = 8
-TIME_HORIZON = 500
 INIT_EXPLORATION = 0
-MONTE_CARLO_RUNS = 200
+MONTE_CARLO_RUNS = 65
 
 def target_func(data_job, plot_label):
-    gaussian_ftpl = Gaussian_FTPL_FI(data_job, num_arms = NUM_ARMS)
-    gaussian_ftpl_identity_cov = Gaussian_FTPL_FI(data_job, identity_cov = True, num_arms = NUM_ARMS)
-    gaussian_ftpl_scaled_down = Gaussian_FTPL_FI(data_job, scaled_down = True, num_arms = NUM_ARMS)
-    gaussian_ftpl_identity_cov_scaled_down = Gaussian_FTPL_FI(data_job, identity_cov = True, scaled_down=True, num_arms = NUM_ARMS)
-
-    algorithms = [
-        gaussian_ftpl,
-        gaussian_ftpl_identity_cov,
-        gaussian_ftpl_scaled_down,
-        gaussian_ftpl_identity_cov_scaled_down
-    ]
+    algorithms = []
+    for i in range(3):
+        for j in range(3):
+            for k in range(2):
+                algorithms.append(Gaussian_FTPL_FI(data_job, 
+                                                   num_arms=NUM_ARMS, 
+                                                   mean_scale=i,
+                                                   covariance_scale=j,
+                                                   covariance_type=k))
+                
+    algorithms.append(Hedge(data_job))
+    algorithms.append(Follow_The_Leader_FI(data_job))
 
     full_info_ground = Full_Info_Play_Ground(data_job, 
                                          algorithms, 
                                          plot_label = plot_label,
-                                         plot_directory = "rewards")
-    full_info_ground.plot_regret()
+                                         plot_directory="rewards")
+    full_info_ground.plot_regret(top_n = 4)
 
-data_jobs = [Fixed_Low_Rank_Exp_1(M = MONTE_CARLO_RUNS, gap = 0.025),
+data_jobs = [Fixed_Low_Rank_Exp_1(M = MONTE_CARLO_RUNS, gap = 0.01),
+             Fixed_Low_Rank_Exp_1(M = MONTE_CARLO_RUNS),
+             Fixed_Low_Rank_Exp_2(M = MONTE_CARLO_RUNS, gap = 0.01),
              Fixed_Low_Rank_Exp_2(M = MONTE_CARLO_RUNS)]
 
 plot_labels = ["Cluster - Very Low Gap",
-               "Cluster - Very High Gap"]
+               "Cluster - Very High Gap", 
+               "Binary Loadings - Very Low Gap",
+               "Binary Loadings - Very High Gap"]
 
 if __name__ == '__main__':
     ctx = mp.get_context('spawn')

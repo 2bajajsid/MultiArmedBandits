@@ -22,54 +22,41 @@ import numpy as np
 from threading import Thread
 import multiprocessing as mp
 
-NUM_ARMS = 8
+NUM_ARMS = 5
 TIME_HORIZON = 500
 INIT_EXPLORATION = 0
-MONTE_CARLO_RUNS = 150
+MONTE_CARLO_RUNS = 65
 
 def target_func(data_job, plot_label):
-    gaussian_ftpl = Gaussian_FTPL_FI(data_job, num_arms = NUM_ARMS)
-    gaussian_ftpl_identity_cov = Gaussian_FTPL_FI(data_job, identity_cov = True, num_arms = NUM_ARMS)
-    gaussian_ftpl_scaled_down = Gaussian_FTPL_FI(data_job, scaled_down = True, num_arms = NUM_ARMS)
-    gaussian_ftpl_zero_mean_scaled_down = Gaussian_FTPL_FI(data_job, scaled_down = True, zero_mean = True, num_arms = NUM_ARMS)
-    gaussian_ftpl_identity_cov_scaled_down = Gaussian_FTPL_FI(data_job, identity_cov = True, scaled_down=True, num_arms = NUM_ARMS)
-    gaussian_ftpl_identity_cov_zero_mean_scaled_down = Gaussian_FTPL_FI(data_job, scaled_down = True, identity_cov = True, zero_mean=True, num_arms = NUM_ARMS)
-    hedge = Hedge(data_job)
-
-    algorithms = [
-        gaussian_ftpl,
-        gaussian_ftpl_scaled_down,
-        gaussian_ftpl_zero_mean_scaled_down,
-        gaussian_ftpl_identity_cov,
-        gaussian_ftpl_identity_cov_scaled_down,
-        gaussian_ftpl_identity_cov_zero_mean_scaled_down,
-        hedge
-    ]
+    algorithms = []
+    for i in range(3):
+        for j in range(3):
+            for k in range(2):
+                algorithms.append(Gaussian_FTPL_FI(data_job, 
+                                                   num_arms=NUM_ARMS, 
+                                                   mean_scale=i,
+                                                   covariance_scale=j,
+                                                   covariance_type=k))
+                
+    algorithms.append(Hedge(data_job))
+    algorithms.append(Follow_The_Leader_FI(data_job))
 
     full_info_ground = Full_Info_Play_Ground(data_job, 
                                          algorithms, 
                                          plot_label = plot_label,
                                          plot_directory="rewards")
-    full_info_ground.plot_regret()
+    full_info_ground.plot_regret(top_n = 4)
 
-data_jobs = [Hadamard_Adversarial(M = MONTE_CARLO_RUNS)]
-plot_labels = ["Hadamard Adversarial"]
+data_jobs = [Hadamard_Adversarial(M = MONTE_CARLO_RUNS, 
+                                  num_arms=NUM_ARMS),
+            Flip_Flop_Mechanism(M = MONTE_CARLO_RUNS, num_arms=NUM_ARMS),
+            Bernoulli_Adversarial(M = MONTE_CARLO_RUNS, num_arms=NUM_ARMS),
+            Low_Gap_Stochastic(M = MONTE_CARLO_RUNS, num_arms=NUM_ARMS)]
 
-'''
-data_jobs = [Fixed_Low_Rank_Exp_3(M = MONTE_CARLO_RUNS),
-             Hadamard_Adversarial(M = MONTE_CARLO_RUNS),
-             Bernoulli_Adversarial(M = MONTE_CARLO_RUNS),
-             Low_Gap_Stochastic(num_arms=NUM_ARMS, 
-                                M = MONTE_CARLO_RUNS),
-             Flip_Flop_Mechanism(num_arms=8, 
-                                 M = MONTE_CARLO_RUNS)]
-
-plot_labels = ["Latent Factor - Binary Loadings (Low Gap)",
-               "Hadamard Adversarial",
-               "Bernoulli Adversarial", 
-               "Low Gap Stochastic",
-               "Flip Flop Mechanism"]
-'''
+plot_labels = ["Hadamard Adversarial",
+               "Flip Flop",
+               "Bernoulli Adversarial",
+               "Low Gap Stochastic"]
 
 if __name__ == '__main__':
     ctx = mp.get_context('spawn')

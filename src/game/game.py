@@ -20,15 +20,6 @@ class Game:
             self.accumulated_regret[i, :] = self.simulate_one_run(hyperparameter)
             if i % 10 == 0:
                 print(i)
-            
-        # self.compute_regret_sub()    
-        # print('Average Regret of delta {} over {} runs calculated (median: {} mean: {} std: {})'
-        #      .format(self.data_generating_mechanism.delta, 
-        #              self.data_generating_mechanism.prior_samples,
-        #              np.median(self.regret_sub_mean),
-        #              np.mean(self.regret_sub_mean), 
-        #              np.std(self.regret_sub_mean) / np.sqrt(self.data_generating_mechanism.prior_samples)))
-        
         return np.mean(self.accumulated_regret, axis=0)
         
     def compute_regret_sub(self):

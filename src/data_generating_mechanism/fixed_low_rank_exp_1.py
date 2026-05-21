@@ -4,7 +4,7 @@ from data_generating_mechanism.data_generating_mechanism import Data_Generating_
 
 class Fixed_Low_Rank_Exp_1(Data_Generating_Mechanism):
         
-    def __init__(self, M = 100, gap = 0.45):
+    def __init__(self, M = 100, gap = 0.1):
         
         mu_arms = [0.5, 0.5, 0.5, 0.5, 
                    0.5 + gap, 0.5 + gap, 0.5 + gap, 0.5 + gap]
@@ -19,7 +19,7 @@ class Fixed_Low_Rank_Exp_1(Data_Generating_Mechanism):
                         [-0.2, -0.2, -0.2, -0.2, 0.6, 0.6, 0.6, 1]
                     ])
         
-        time = 5000
+        time = 3000
 
         super().__init__(time_horizon = time, 
                          mu_arms = mu_arms, 

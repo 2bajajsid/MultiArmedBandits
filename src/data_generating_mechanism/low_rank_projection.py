@@ -17,12 +17,15 @@ class Low_Rank_Stochastic(Data_Generating_Mechanism):
         if (low_rank_dimension > 1):
             self.second_optimal_arm_index = np.flip(np.argsort(mu_arms))[1]
             self.optimal_arm_index = np.flip(np.argsort(mu_arms))[0]
-            mu_arms[self.optimal_arm_index] = mu_arms[self.second_optimal_arm_index] + 0.3333
+            mu_arms[self.optimal_arm_index] = mu_arms[self.second_optimal_arm_index] + optimality_gap
 
         self.low_rank_subspace = np.random.rand(num_arms, 
                                                 low_rank_dimension)
         self.actual_num_arms = num_arms
-        time = int((np.log(num_arms) / (0.02**2))) * 2
+        if optimality_gap > 0:
+            time = min(int((np.log(num_arms) / (optimality_gap**2))) * 2, 3000)
+        else:
+            time = 3000
 
         super().__init__(time_horizon = time, 
                          mu_arms = mu_arms, 

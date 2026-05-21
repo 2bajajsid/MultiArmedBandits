@@ -14,18 +14,28 @@ class PlayGround:
         self.gap = gap
         self.hyperparameters = hyperparameters
 
-    def plot_regret(self):
+    def plot_regret(self, top_n = 3):
         plt.rcParams["figure.figsize"] = (15,6)
         fig, ax = plt.subplots()
 
+        games_averaged_regret = np.zeros(shape = (len(self.games), 
+                                                  self.horizon))
         for g in range(len(self.games)):
+            games_averaged_regret[g, :] = self.games[g].compute_averaged_regret(0)
+
+        for g in range(len(self.games)):
+            print("{} : {}".format(self.games[g].label, 
+                                   games_averaged_regret[g, self.horizon - 1]))
+        
+        top_n_algo_indices = np.argsort(games_averaged_regret[:, -1])[:top_n]
+        for i in top_n_algo_indices:
             plt.plot(range(self.horizon), 
-                    self.games[g].compute_averaged_regret(0), 
-                    label = "{}".format(self.games[g].label))
+                    games_averaged_regret[i, :], 
+                    label = self.games[i].label)
             
         plt.legend()
-        plt.title("Instantaneuous Regret (T = {}, M = {})".format(self.horizon, self.num_runs))
-        plt.ylabel('Average Instantaneuous Regret')
+        plt.title("Cumulative Regret (T = {}, M = {})".format(self.horizon, self.num_runs))
+        plt.ylabel('Cumulative Regret')
         plt.xlabel('Round n')
         plt.savefig(self.label)
         plt.close()
